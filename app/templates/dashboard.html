@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard · Finance Tracker</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script></head>
+<body>
+<header><h1>AI Finance Tracker</h1>
+  <div><input type="month" id="month"> <span>{{ username }}</span> <button id="logout" class="secondary">Sign out</button></div></header>
+<main>
+  <section id="alerts" aria-live="polite"></section>
+  <section class="grid kpis">
+    <div class="card"><h3>Income</h3><p id="k-inc">–</p></div>
+    <div class="card"><h3>Expenses</h3><p id="k-exp">–</p></div>
+    <div class="card"><h3>Savings</h3><p id="k-sav">–</p></div>
+    <div class="card"><h3>Savings rate</h3><p id="k-rate">–</p></div>
+  </section>
+  <section class="grid two">
+    <div class="card"><h2>Spending by category</h2><canvas id="c-cat" height="220"></canvas></div>
+    <div class="card"><h2>Monthly trend</h2><canvas id="c-trend" height="220"></canvas></div>
+  </section>
+  <section class="grid two">
+    <div class="card"><h2>Recommendations</h2><ul id="recs"></ul></div>
+    <div class="card"><h2>Unusual spending</h2><ul id="anoms"></ul></div>
+  </section>
+  <section class="grid two">
+    <div class="card"><h2>Subscriptions</h2><table id="subs"><thead><tr><th>Name</th><th>Every</th><th>Amount</th><th>Next renewal</th></tr></thead><tbody></tbody></table></div>
+    <div class="card"><h2>Budgets</h2><div id="budgets"></div>
+      <form id="bf" class="inline"><select name="category">{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select>
+      <input name="monthly_limit" type="number" min="0" step="0.01" placeholder="Monthly limit (0 removes)" required><button>Set</button></form></div>
+  </section>
+  <section class="card"><h2>Add transaction</h2>
+    <form id="tf" class="inline">
+      <input name="date" type="date" value="{{ today }}" required>
+      <input name="description" placeholder="Description" required maxlength="120">
+      <input name="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
+      <select name="type"><option>expense</option><option>income</option></select>
+      <button>Add</button></form>
+    <form id="cf" class="inline"><label>Import CSV (date, description, amount[, type]) <input type="file" name="file" accept=".csv" required></label><button>Import</button></form>
+    <p id="status" role="status"></p>
+  </section>
+  <section class="card"><h2>Transactions</h2>
+    <table id="tx"><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Category</th><th></th></tr></thead><tbody></tbody></table></section>
+</main>
+<script>const CATS={{ categories|tojson }};</script>
+<script src="/static/app.js"></script>
+</body></html>

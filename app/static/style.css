@@ -1,0 +1,21 @@
+:root{--bg:#f5f6fa;--card:#fff;--ink:#1d2433;--mut:#667;--pri:#3b5bdb;--bad:#c92a2a;--warn:#e67700;--ok:#2b8a3e}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--card);border-bottom:1px solid #e3e6ee}
+header h1{font-size:18px;margin:0}main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:var(--card);border-radius:10px;padding:16px;box-shadow:0 1px 3px #0001;margin-bottom:16px}
+.card h2{font-size:16px;margin:0 0 10px}.card h3{font-size:13px;margin:0;color:var(--mut);font-weight:500}
+.kpis p{font-size:24px;font-weight:600;margin:4px 0 0}
+.grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}.two{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.grid>.card{margin:0}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #eef0f5}th{color:var(--mut);font-weight:500;font-size:13px}
+button{background:var(--pri);color:#fff;border:0;border-radius:6px;padding:7px 14px;cursor:pointer;font:inherit}
+button.secondary{background:#e9ecf5;color:var(--ink)}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+input,select{padding:7px 9px;border:1px solid #cfd4e3;border-radius:6px;font:inherit}
+.inline{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center}
+.alert{padding:10px 14px;border-radius:8px;margin-bottom:8px;background:#fff4e6;border-left:4px solid var(--warn)}
+.bar{height:8px;background:#e9ecf5;border-radius:4px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--ok)}
+.bar.warning>i{background:var(--warn)}.bar.over>i{background:var(--bad)}
+.err{color:var(--bad);min-height:1.2em}.neg{color:var(--bad)}.pos{color:var(--ok)}
+body.auth{display:grid;place-items:center;min-height:100vh}.auth .card{width:min(380px,92vw)}
+.auth label{display:block;margin:10px 0}.auth input{width:100%}.auth button{margin-right:8px}
+ul{padding-left:18px;margin:0}li{margin-bottom:6px}

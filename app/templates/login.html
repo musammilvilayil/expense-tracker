@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign in · Finance Tracker</title>
+<link rel="stylesheet" href="/static/style.css"></head>
+<body class="auth">
+<main class="card">
+  <h1>AI Finance &amp; Subscription Tracker</h1>
+  <form id="f">
+    <label>Username <input name="username" required minlength="3" autocomplete="username"></label>
+    <label>Password <input name="password" type="password" required minlength="8" autocomplete="current-password"></label>
+    <p id="msg" role="alert" class="err"></p>
+    <button type="submit" data-act="login">Sign in</button>
+    <button type="submit" data-act="register" class="secondary">Create account</button>
+  </form>
+</main>
+<script>
+const f=document.getElementById('f'); let act='login';
+f.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>act=b.dataset.act));
+f.addEventListener('submit',async e=>{
+  e.preventDefault();
+  const r=await fetch('/api/'+act,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(Object.fromEntries(new FormData(f)))});
+  if(r.ok) location.href='/'; else document.getElementById('msg').textContent=(await r.json()).error;
+});
+</script></body></html>
