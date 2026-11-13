@@ -124,3 +124,20 @@ def test_dashboard_requires_login_and_nav_changes(client, tmp_path):
     assert client.get("/dashboard").status_code == 200
     assert b'href="/dashboard"' in client.get("/").data
     assert client.get("/login").status_code == 302
+
+
+def test_faq_and_contact_pages(tmp_path):
+    app = create_app({"TESTING": True, "DATABASE": str(tmp_path / "c.sqlite")})
+    c = app.test_client()
+    assert c.get("/faq").status_code == 200 and b"<details" in c.get("/faq").data
+    assert c.get("/contact").status_code == 200
+    bad = c.post("/contact", data={"name": "", "email": "nope", "subject": "", "message": "hi"})
+    assert bad.status_code == 400 and b"valid email" in bad.data
+    ok = c.post("/contact", data={"name": "Ann", "email": "ann@example.com", "subject": "Hi", "message": "Hello there, team"})
+    assert ok.status_code == 200 and b"received" in ok.data
+    spam = c.post("/contact", data={"name": "x", "email": "x@x.co", "subject": "s", "message": "spam spam spam", "website": "http://spam"})
+    assert b"received" in spam.data
+    with app.app_context():
+        from app.db import get_db
+        rows = get_db().execute("SELECT name FROM contact_messages").fetchall()
+        assert [r["name"] for r in rows] == ["Ann"]

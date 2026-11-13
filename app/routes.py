@@ -1,4 +1,5 @@
 import functools
+import re
 from datetime import date, datetime
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session
@@ -107,6 +108,51 @@ def about():
 @bp.get("/privacy")
 def privacy():
     return render_template("privacy.html")
+
+
+FAQS = [
+    ("Is my data safe?", "Passwords are stored as salted hashes and each account only sees its own data. This is a student project, so avoid entering real data on a deployment without HTTPS."),
+    ("Does it connect to my bank?", "No. You add transactions by hand or import a CSV. Bank integrations are future scope."),
+    ("How does automatic categorization work?", "A machine-learning model (TF-IDF with logistic regression) predicts a category from the description. When you correct one, the model learns from it."),
+    ("Why was a subscription not detected?", "A charge must repeat at least twice at a regular interval (weekly, monthly, quarterly or yearly) with a similar amount."),
+    ("Does autopay really pay my bills?", "No. Autopay rules only record transactions in the tracker on their due dates. No money moves."),
+    ("What CSV format should I use?", "Columns date, description and amount, with an optional type column (income or expense). Without type, negative amounts are expenses."),
+    ("What counts as unusual spending?", "An expense far above the typical amount for its category. At least 5 expenses in that category are needed first."),
+    ("Is this financial advice?", "No. Tips are automated guidance based on your own numbers."),
+    ("Can I delete my data?", "You can delete transactions and autopay rules. Account deletion and data export are planned."),
+]
+
+
+@bp.get("/faq")
+def faq():
+    return render_template("faq.html", faqs=FAQS)
+
+
+@bp.route("/contact", methods=["GET", "POST"])
+def contact():
+    ctx = {"errors": [], "form": {}, "sent": False}
+    if request.method == "POST":
+        f = {k: (request.form.get(k) or "").strip() for k in ("name", "email", "subject", "message")}
+        ctx["form"] = f
+        if request.form.get("website"):  # honeypot: bots fill hidden field
+            ctx.update(sent=True, form={})
+            return render_template("contact.html", **ctx)
+        if not (1 <= len(f["name"]) <= 80):
+            ctx["errors"].append("Please enter your name (max 80 characters).")
+        if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", f["email"]) or len(f["email"]) > 120:
+            ctx["errors"].append("Please enter a valid email address.")
+        if not (1 <= len(f["subject"]) <= 120):
+            ctx["errors"].append("Please enter a subject (max 120 characters).")
+        if not (10 <= len(f["message"]) <= 2000):
+            ctx["errors"].append("Message must be 10 to 2000 characters.")
+        if not ctx["errors"]:
+            db = get_db()
+            db.execute("INSERT INTO contact_messages(name,email,subject,message) VALUES(?,?,?,?)",
+                       (f["name"], f["email"], f["subject"], f["message"]))
+            db.commit()
+            ctx.update(sent=True, form={})
+        return render_template("contact.html", **ctx), (400 if ctx["errors"] else 200)
+    return render_template("contact.html", **ctx)
 
 
 @bp.get("/dashboard")

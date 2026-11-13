@@ -1,0 +1,9 @@
+{% extends "public_base.html" %}
+{% block title %}FAQ · AI Finance Tracker{% endblock %}
+{% block content %}
+<h1>Frequently asked questions</h1>
+{% for q, a in faqs %}
+<details class="card faq"><summary>{{ q }}</summary><p>{{ a }}</p></details>
+{% endfor %}
+<p>Still stuck? <a href="/contact">Contact us</a>.</p>
+{% endblock %}

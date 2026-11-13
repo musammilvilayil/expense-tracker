@@ -29,3 +29,6 @@ a.btn.secondary{background:#e9ecf5;color:var(--ink)}a.btn.big{padding:11px 22px;
 .cards3{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));margin:16px 0}.cards3 .card{margin:0}
 .steps{list-style:none;padding:0}.steps li{background:var(--card);border-radius:10px;padding:4px 16px;margin-bottom:12px;box-shadow:0 1px 3px #0001}
 .pubfoot{text-align:center;color:var(--mut);padding:24px;font-size:13px}.pubfoot a{color:var(--mut)}
+.faq summary{cursor:pointer;font-weight:600}.faq p{margin:8px 0 0;color:var(--mut)}.faq{margin-bottom:10px}
+.cform{max-width:560px}.cform label{display:block;margin:10px 0}.cform input,.cform textarea{width:100%;padding:8px 10px;border:1px solid #cfd4e3;border-radius:6px;font:inherit}
+.hp{position:absolute;left:-9999px}
