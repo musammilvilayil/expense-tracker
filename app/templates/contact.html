@@ -1,7 +1,8 @@
 {% extends "public_base.html" %}
+{% from "_art.html" import mail %}
 {% block title %}Contact · AI Finance Tracker{% endblock %}
 {% block content %}
-<div class="pagehead"><div class="wrap"><span class="eyebrow">Support</span><h1>Contact us</h1></div></div>
+<div class="pagehead"><div class="wrap"><div><span class="eyebrow pill" data-reveal>Support</span><h1 data-reveal style="--d:.08s">Contact us</h1></div><div data-reveal="zoom" aria-hidden="true">{{ mail() }}</div></div></div>
 <div class="wrap"><div class="content">
 
 {% if sent %}<p class="card" role="status">Thanks! Your message has been received.</p>{% endif %}

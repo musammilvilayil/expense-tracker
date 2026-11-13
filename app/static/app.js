@@ -11,7 +11,16 @@ const api = async (url, opt = {}) => {
 const json = (method, body) => ({method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
 const status = (m, bad) => { const el = $('#status'); el.textContent = m; el.className = bad ? 'err' : ''; };
 let charts = {};
-const PAL = ['#3f7308', '#b2eb76', '#4fa68f', '#c9753d', '#ebe46a', '#b3c5a0', '#18280e', '#d0c4a5'];
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const tween = (el, to, fmt = money) => {
+  const from = parseFloat(el.dataset.v || 0); el.dataset.v = to;
+  if (reduceMotion) { el.textContent = fmt(to); return; }
+  const t0 = performance.now();
+  const step = t => { const p = Math.min((t - t0) / 900, 1), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = fmt(from + (to - from) * e); if (p < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+};
+const PAL = ['#2f6b0a', '#b8f06f', '#5bb8d4', '#e0803f', '#f3dc6b', '#a99bf0', '#0d1a08', '#d6e4c4'];
 $('#month').value = new Date().toISOString().slice(0, 7);
 
 function chart(id, cfg) { charts[id]?.destroy(); if (window.Chart) charts[id] = new Chart($(id), cfg); }
@@ -21,9 +30,9 @@ async function refresh() {
   const [ins, txs, ap] = await Promise.all([api('/api/insights?month=' + month), api('/api/transactions'), api('/api/autopay')]);
   $('#ap tbody').innerHTML = ap.length ? ap.map(a => `<tr><td>${esc(a.description)}${a.active ? '' : ' (paused)'}</td><td>${a.type === 'income' ? '+' : '-'}${money(a.amount)}</td><td>${a.frequency}</td><td>${a.next_date}</td><td><button class="secondary" data-pause="${a.id}" data-active="${a.active ? 0 : 1}">${a.active ? 'Pause' : 'Resume'}</button> <button class="secondary" data-apdel="${a.id}" aria-label="Delete autopay">×</button></td></tr>`).join('') : '<tr><td colspan="5">No autopay rules.</td></tr>';
   const s = ins.summary;
-  $('#k-inc').textContent = money(s.income); $('#k-exp').textContent = money(s.expense);
-  $('#k-sav').textContent = money(s.savings); $('#k-sav').className = s.savings < 0 ? 'neg' : 'pos';
-  $('#k-rate').textContent = s.savings_rate + '%';
+  tween($('#k-inc'), s.income); tween($('#k-exp'), s.expense);
+  tween($('#k-sav'), s.savings); $('#k-sav').className = s.savings < 0 ? 'neg' : 'pos';
+  tween($('#k-rate'), s.savings_rate, v => v.toFixed(1) + '%');
 
   $('#alerts').innerHTML = [
     ...ins.renewals_due.map(r => `Renewal due ${esc(r.next_renewal)}: ${esc(r.name)} (${money(r.amount)})`),
@@ -37,7 +46,7 @@ async function refresh() {
     : '<li>No unusual spending detected.</li>';
   $('#subs tbody').innerHTML = ins.subscriptions.length
     ? ins.subscriptions.map(x => `<tr><td>${esc(x.name)}</td><td>${x.frequency}</td><td>${money(x.amount)}</td><td>${x.next_renewal}</td></tr>`).join('')
-    : '<tr><td colspan="4">No recurring charges detected yet.</td></tr>';
+    : '<tr><td colspan="4" class="empty">No recurring charges detected yet.</td></tr>';
   $('#budgets').innerHTML = ins.budgets.length
     ? ins.budgets.map(b => `<div><div>${esc(b.category)}: ${money(b.spent)} / ${money(b.limit)}</div><div class="bar ${b.status}"><i style="width:${Math.min(b.percent, 100)}%"></i></div></div>`).join('')
     : '<p>No budgets set.</p>';
@@ -45,8 +54,8 @@ async function refresh() {
   chart('#c-cat', {type: 'doughnut', options: {maintainAspectRatio: false}, data: {labels: Object.keys(s.by_category), datasets: [{data: Object.values(s.by_category), backgroundColor: PAL, borderColor: '#fff'}]}});
   const months = Object.keys(ins.yearly.by_month);
   chart('#c-trend', {type: 'bar', options: {maintainAspectRatio: false}, data: {labels: months, datasets: [
-    {label: 'Income', data: months.map(m => ins.yearly.by_month[m].income), backgroundColor: '#3f7308'},
-    {label: 'Expense', data: months.map(m => ins.yearly.by_month[m].expense), backgroundColor: '#c9753d'}]}});
+    {label: 'Income', data: months.map(m => ins.yearly.by_month[m].income), backgroundColor: '#2f6b0a'},
+    {label: 'Expense', data: months.map(m => ins.yearly.by_month[m].expense), backgroundColor: '#e0803f'}]}});
 
   $('#tx tbody').innerHTML = txs.slice(0, 100).map(t => `<tr><td>${t.date}</td><td>${esc(t.description)}</td>
     <td class="${t.type === 'income' ? 'pos' : ''}">${t.type === 'income' ? '+' : '-'}${money(t.amount)}</td>

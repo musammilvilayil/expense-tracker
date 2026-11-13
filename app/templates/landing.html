@@ -1,45 +1,67 @@
 {% extends "public_base.html" %}
 {% block content %}
-<section class="hero"><div class="wrap">
-  <span class="eyebrow">AI personal finance</span>
-  <h1>The smarter way to understand your money.</h1>
-  <p class="lead">Import your transactions and let machine learning categorize them, find your subscriptions and flag unusual spending, all explained in plain language.</p>
-  <div class="actions"><a class="btn big" href="/login">Get started</a><a class="btn big secondary" href="/how-it-works">See how it works</a></div>
-</div></section>
-<div class="trust">No bank passwords &middot; Your data stays in your account &middot; Open and explainable</div>
+<section class="hero">
+  <span class="blob a" data-speed="-.08"></span><span class="blob b" data-speed=".06"></span>
+  <div class="wrap">
+    <div>
+      <span class="eyebrow pill" data-reveal>AI-powered personal finance</span>
+      <h1 data-reveal style="--d:.08s">Your money, <span class="grad">finally explained.</span></h1>
+      <p class="lead" data-reveal style="--d:.16s">Import your transactions and let machine learning categorize them, find every subscription and flag unusual spending, in plain language.</p>
+      <div class="actions" data-reveal style="--d:.24s"><a class="btn big" href="/login">Get started free <span class="arr">&rarr;</span></a><a class="btn big secondary" href="/how-it-works">See how it works</a></div>
+      <p class="note" data-reveal style="--d:.3s">No bank passwords needed &middot; Import a CSV in minutes</p>
+    </div>
+    <div class="art" aria-hidden="true" data-reveal="zoom" style="--d:.2s">
+      <div class="main" data-speed="-.03">
+        <h4>This month</h4><div class="big">2,418.50</div>
+        <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <svg class="line" viewBox="0 0 300 70" width="100%" fill="none"><path d="M4 56C40 52 50 20 90 30s60 26 100 8 60-30 106-30" stroke="#2f6b0a" stroke-width="3.5" stroke-linecap="round"/><circle cx="296" cy="8" r="6" fill="#b8f06f" stroke="#2f6b0a" stroke-width="2.5"/></svg>
+      </div>
+      <div class="chip c1" data-speed="-.07"><span class="dot" style="background:#ffd9ad">&#9201;</span><span>Netflix<small>Renews in 3 days</small></span></div>
+      <div class="chip c2" data-speed="-.12"><span class="dot" style="background:#eaf3de">&#10003;</span><span>Food budget<small>76% used</small></span></div>
+      <div class="chip c3" data-speed="-.05"><span class="dot" style="background:#fde2dd">!</span><span>Unusual charge<small>400 vs typical 12</small></span></div>
+      <div class="chip c4" data-speed="-.1"><span class="dot" style="background:#cfeaf4">&#8635;</span><span>Rent recorded<small>Autopay</small></span></div>
+      <span class="coin" style="left:46%;top:-4px" data-speed="-.14">$</span><span class="coin" style="right:-16px;bottom:96px;animation-delay:-2s" data-speed="-.04">&#8377;</span>
+    </div>
+  </div>
+</section>
 
-<section class="band"><div class="wrap split">
-  <div><span class="eyebrow">Categorize</span><h2>Every expense, sorted automatically.</h2>
-    <p>A model reads each description and assigns Food, Transport, Shopping, Bills and more. Correct one label and it learns your habits.</p>
-    <a class="btn dark" href="/features">Learn more</a></div>
-  <div class="panel" aria-hidden="true">
-    <div class="row"><span>Swiggy order</span><b>Food</b></div><div class="row"><span>Uber ride</span><b>Transport</b></div>
-    <div class="row"><span>Netflix</span><b>Entertainment</b></div><div class="row"><span>Electricity bill</span><b>Bills</b></div></div>
+<div class="marquee" aria-hidden="true"><div class="track">
+  {% for _ in range(2) %}{% for t in ["Food","Transport","Shopping","Bills","Entertainment","Health","Education","Subscriptions","Autopay","Budgets","Insights"] %}<span class="tag">{{ t }}</span>{% endfor %}{% endfor %}
+</div></div>
+
+<section class="section"><div class="wrap">
+  <div class="section-head"><span class="eyebrow pill">How it helps</span><h2>From messy transactions to clear decisions.</h2><p>Scroll through the three things that make the biggest difference.</p></div>
+  <div class="story">
+    <div class="story-steps">
+      <div class="step"><span class="num">01 / CATEGORIZE</span><h3>Every expense, sorted automatically.</h3><p>A model reads each description and assigns Food, Transport, Shopping, Bills and more. Correct one label and it learns your habits.</p></div>
+      <div class="step"><span class="num">02 / SUBSCRIPTIONS</span><h3>Find what keeps charging you.</h3><p>Repeated charges are detected with their yearly cost and next renewal date, so nothing renews unnoticed.</p></div>
+      <div class="step"><span class="num">03 / BUDGETS</span><h3>Know before you overspend.</h3><p>Set monthly budgets per category and get warnings at 80% and 100%, plus alerts for charges far above your normal.</p></div>
+    </div>
+    <div class="story-art" aria-hidden="true">
+      <div class="sa">{{ categorize() }}</div><div class="sa">{{ calendar() }}</div><div class="sa">{{ ring() }}</div>
+    </div>
+  </div>
 </div></section>
 
-<section class="band"><div class="wrap split">
-  <div class="panel" aria-hidden="true">
-    <div class="row"><span>Netflix &middot; monthly</span><b>Renews in 3 days</b></div><div class="row"><span>Gym &middot; quarterly</span><b>Renews in 41 days</b></div>
-    <div class="row"><span>Cloud storage &middot; yearly</span><b>Renews in 212 days</b></div></div>
-  <div><span class="eyebrow">Subscriptions</span><h2>Find what keeps charging you.</h2>
-    <p>Repeated charges are detected with their yearly cost and next renewal date, so nothing renews unnoticed.</p>
-    <a class="btn dark" href="/features">Learn more</a></div>
+<section class="section tint"><div class="wrap">
+  <div class="section-head"><span class="eyebrow pill">Everything in one place</span><h2>Built for real, everyday money.</h2></div>
+  <div class="bento">
+    <div class="b s4"><div class="ico">&#8635;</div><h3>Autopay rules</h3><p>Record rent, EMIs and salary on schedule. Missed days catch up automatically. Nothing is paid from a real account.</p>
+      <svg class="mini" viewBox="0 0 120 120" aria-hidden="true" fill="none"><circle cx="60" cy="60" r="44" stroke="#d6e4c4" stroke-width="3" stroke-dasharray="3 8"/><g class="spin" style="transform-origin:60px 60px"><path d="M60 16a44 44 0 0 1 38 22" stroke="#2f6b0a" stroke-width="5" stroke-linecap="round"/></g></svg></div>
+    <div class="b s2"><div class="ico">&#128194;</div><h3>CSV import</h3><p>Upload a statement. Dates are normalized and duplicates removed.</p></div>
+    <div class="b s2"><div class="ico">&#128161;</div><h3>Explainable alerts</h3><p>Every warning says why, such as "typical charge is 12, this was 400".</p></div>
+    <div class="b s2"><div class="ico">&#128200;</div><h3>Reports</h3><p>Monthly and yearly summaries with an income versus expense trend.</p></div>
+    <div class="b s2"><div class="ico">&#128274;</div><h3>Private by design</h3><p>No bank logins. Each account sees only its own data.</p></div>
+  </div>
 </div></section>
 
-<section class="band"><div class="wrap split">
-  <div><span class="eyebrow">Budgets &amp; alerts</span><h2>Know before you overspend.</h2>
-    <p>Set monthly category budgets and get warnings at 80% and 100%, plus alerts for charges far above your normal.</p>
-    <a class="btn dark" href="/features">Learn more</a></div>
-  <div class="panel" aria-hidden="true"><div class="row"><span>Food budget</span><b>84%</b></div><div class="bar warning"><i style="width:84%"></i></div>
-    <div class="row"><span>Unusual charge</span><b>400 vs typical 12</b></div></div>
-</div></section>
-
-<section class="band"><div class="wrap"><div class="stats">
-  <div><div class="stat">8</div><span class="eyebrow">Spending categories</span></div>
-  <div><div class="stat">4</div><span class="eyebrow">Recurring frequencies</span></div>
-  <div><div class="stat">0</div><span class="eyebrow">Bank credentials needed</span></div>
+<section class="section"><div class="wrap"><div class="stats">
+  <div><div class="stat"><span data-count="8">0</span></div><span class="eyebrow">Spending categories</span></div>
+  <div><div class="stat"><span data-count="4">0</span></div><span class="eyebrow">Recurring frequencies</span></div>
+  <div><div class="stat"><span data-count="0">0</span></div><span class="eyebrow">Bank credentials needed</span></div>
 </div></div></section>
 
-<section class="cta"><h2>Take control of your spending.</h2><p>Create a free account and import your first statement in minutes.</p>
-  <a class="btn big" href="/login">Get started</a></section>
+<section class="cta" data-reveal="zoom"><span class="ring r1"></span><span class="ring r2"></span>
+  <h2>Take control of your spending.</h2><p>Create a free account and import your first statement in minutes.</p>
+  <a class="btn big" href="/login">Get started free <span class="arr">&rarr;</span></a></section>
 {% endblock %}

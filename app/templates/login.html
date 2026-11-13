@@ -1,17 +1,19 @@
+{% from "_art.html" import auth %}
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sign in · AI Finance Tracker</title>
+<script>document.documentElement.classList.add('js')</script>
 <link rel="stylesheet" href="/static/style.css"></head>
 <body class="auth">
 <aside class="auth-side">
   <a class="brand" href="/"><i></i>AI Finance Tracker</a>
-  <div><h2>Understand your money. Never miss a renewal.</h2>
-    <p>Categorize expenses, find subscriptions and get clear, explainable insights.</p></div>
+  <div><h2>Understand your money. <span class="grad">Never miss a renewal.</span></h2>
+    <p>Categorize expenses, find subscriptions and get clear, explainable insights.</p>{{ auth() }}</div>
   <small>CSE final-year project</small>
 </aside>
 <main class="auth-main">
-  <form id="f">
-    <span class="eyebrow">Welcome</span>
+  <form id="f" data-reveal>
+    <span class="eyebrow pill">Welcome</span>
     <h1>Sign in or create an account</h1>
     <label>Username <input name="username" required minlength="3" autocomplete="username"></label>
     <label>Password <input name="password" type="password" required minlength="8" autocomplete="current-password"></label>
@@ -23,6 +25,7 @@
     <p><a href="/">&larr; Back to home</a></p>
   </form>
 </main>
+<script src="/static/site.js" defer></script>
 <script>
 const f=document.getElementById('f'); let act='login';
 f.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>act=b.dataset.act));

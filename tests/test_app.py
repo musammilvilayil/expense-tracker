@@ -141,3 +141,11 @@ def test_faq_and_contact_pages(tmp_path):
         from app.db import get_db
         rows = get_db().execute("SELECT name FROM contact_messages").fetchall()
         assert [r["name"] for r in rows] == ["Ann"]
+
+
+def test_404_pages(tmp_path):
+    c = create_app({"TESTING": True, "DATABASE": str(tmp_path / "n.sqlite")}).test_client()
+    r = c.get("/nope")
+    assert r.status_code == 404 and b"wandered off" in r.data
+    assert c.get("/api/nope").get_json() == {"error": "not found"}
+    assert b"site.js" in c.get("/").data

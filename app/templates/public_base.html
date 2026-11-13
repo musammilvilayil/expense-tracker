@@ -1,9 +1,13 @@
+{% from "_art.html" import categorize, calendar, ring, loop, mail, question, shield, auth, lost %}
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{% block title %}AI Finance &amp; Subscription Tracker{% endblock %}</title>
 <meta name="description" content="{% block desc %}Track expenses, find forgotten subscriptions and get personalised spending insights.{% endblock %}">
+<meta name="theme-color" content="#fbfcf8">
+<script>document.documentElement.classList.add('js')</script>
 <link rel="stylesheet" href="/static/style.css"></head>
 <body>
+<div class="progress" aria-hidden="true"><i></i></div>
 <a class="skip" href="#content">Skip to content</a>
 <div class="announce"><a href="/features">New: autopay rules record your recurring payments automatically &rarr;</a></div>
 <header class="pubnav"><a class="brand" href="/"><i></i>AI Finance Tracker</a>
@@ -16,7 +20,7 @@
     <a href="/contact" {% if p=='/contact' %}aria-current="page"{% endif %}>Contact</a>
     {% if session.get('user_id') %}<a class="btn" href="/dashboard">Dashboard</a>{% else %}<a class="btn" href="/login">Sign in</a>{% endif %}
   </nav></header>
-<main id="content" class="pubmain">{% block content %}{% endblock %}</main>
+<main id="content">{% block content %}{% endblock %}</main>
 <footer class="pubfoot">
   <div class="cols">
     <div><a class="brand" href="/"><i></i>AI Finance Tracker</a><p>Understand your money.<br>Never miss a renewal.</p></div>
@@ -26,4 +30,5 @@
   </div>
   <small>CSE final-year project. Recommendations are guidance, not professional financial advice.</small>
 </footer>
+<script src="/static/site.js" defer></script>
 </body></html>

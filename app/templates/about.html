@@ -1,7 +1,8 @@
 {% extends "public_base.html" %}
+{% from "_art.html" import shield %}
 {% block title %}About · AI Finance Tracker{% endblock %}
 {% block content %}
-<div class="pagehead"><div class="wrap"><span class="eyebrow">Company</span><h1>About</h1></div></div>
+<div class="pagehead"><div class="wrap"><div><span class="eyebrow pill" data-reveal>Company</span><h1 data-reveal style="--d:.08s">About</h1></div><div data-reveal="zoom" aria-hidden="true">{{ shield() }}</div></div></div>
 <div class="wrap"><div class="content">
 
 <p>The AI-Powered Personal Finance and Subscription Tracker is a CSE final-year project. It combines personal finance management with machine learning so that tracking money takes less effort and says more.</p>

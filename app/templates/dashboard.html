@@ -1,11 +1,13 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Dashboard · Finance Tracker</title>
+<script>document.documentElement.classList.add('js')</script>
 <link rel="stylesheet" href="/static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script></head>
 <body class="app">
+<div class="progress" aria-hidden="true"><i></i></div>
 <header class="apptop"><a class="brand" href="/"><i></i>AI Finance Tracker</a>
-  <div><label for="month" class="eyebrow" style="color:#b3c5a0">Month</label><input type="month" id="month"> <span>{{ username }}</span> <button id="logout" class="secondary">Sign out</button></div></header>
+  <div><label for="month" class="eyebrow">Month</label><input type="month" id="month"> <span>{{ username }}</span> <button id="logout" class="secondary">Sign out</button></div></header>
 <main class="appmain">
   <section id="alerts" aria-live="polite"></section>
   <section class="grid kpis">
@@ -53,4 +55,5 @@
 </main>
 <script>const CATS={{ categories|tojson }};</script>
 <script src="/static/app.js"></script>
+<script src="/static/site.js" defer></script>
 </body></html>

@@ -1,16 +1,17 @@
 {% extends "public_base.html" %}
+{% from "_art.html" import loop %}
 {% block title %}How it works · AI Finance Tracker{% endblock %}
 {% block content %}
-<div class="pagehead"><div class="wrap"><span class="eyebrow">Product</span><h1>How it works</h1></div></div>
-<div class="wrap"><div class="content">
+<div class="pagehead"><div class="wrap"><div><span class="eyebrow pill" data-reveal>Product</span><h1 data-reveal style="--d:.08s">How it works</h1></div><div data-reveal="zoom" aria-hidden="true">{{ loop() }}</div></div></div>
+<div class="wrap"><div class="content wide">
 
-<ol class="steps">
-  <li><h2>1. Collect</h2><p>Create an account, then add transactions or import a CSV.</p></li>
-  <li><h2>2. Clean</h2><p>Dates and descriptions are normalized and duplicates dropped.</p></li>
-  <li><h2>3. Categorize</h2><p>The ML model assigns a category to every expense.</p></li>
-  <li><h2>4. Detect subscriptions</h2><p>Charges that repeat at a regular interval with a steady amount are flagged.</p></li>
-  <li><h2>5. Analyze</h2><p>Spending patterns, budgets and outliers are computed per category.</p></li>
-  <li><h2>6. Act</h2><p>See your dashboard, alerts and recommendations, and adjust budgets or cancel subscriptions.</p></li>
+<ol class="timeline">
+  <li data-n="1"><h2>Collect</h2><p>Create an account, then add transactions or import a CSV.</p></li>
+  <li data-n="2"><h2>Clean</h2><p>Dates and descriptions are normalized and duplicates dropped.</p></li>
+  <li data-n="3"><h2>Categorize</h2><p>The ML model assigns a category to every expense.</p></li>
+  <li data-n="4"><h2>Detect subscriptions</h2><p>Charges that repeat at a regular interval with a steady amount are flagged.</p></li>
+  <li data-n="5"><h2>Analyze</h2><p>Spending patterns, budgets and outliers are computed per category.</p></li>
+  <li data-n="6"><h2>Act</h2><p>See your dashboard, alerts and recommendations, and adjust budgets or cancel subscriptions.</p></li>
 </ol>
 <p>Raw financial data becomes actionable information. <a href="/login">Try it</a>.</p>
 </div></div>

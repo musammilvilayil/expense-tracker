@@ -1,0 +1,92 @@
+{# Inline SVG illustrations. Decorative, so aria-hidden. #}
+{% macro categorize() %}
+<svg viewBox="0 0 400 320" aria-hidden="true" fill="none">
+  <rect x="40" y="30" width="170" height="250" rx="18" fill="#fff" stroke="#e3ebd8" stroke-width="2"/>
+  <path d="M60 60h90M60 84h130M60 108h70M60 150h110M60 174h90M60 198h120M60 240h70" stroke="#d6e4c4" stroke-width="8" stroke-linecap="round"/>
+  <g class="fl"><rect x="200" y="50" width="150" height="40" rx="20" fill="#b8f06f"/><circle cx="224" cy="70" r="9" fill="#2f6b0a"/><text x="242" y="75" font-size="14" font-weight="700" fill="#0d1a08" font-family="sans-serif">Food</text></g>
+  <g class="fl2"><rect x="220" y="130" width="150" height="40" rx="20" fill="#ffd9ad"/><circle cx="244" cy="150" r="9" fill="#e0803f"/><text x="262" y="155" font-size="14" font-weight="700" fill="#0d1a08" font-family="sans-serif">Transport</text></g>
+  <g class="fl"><rect x="200" y="210" width="160" height="40" rx="20" fill="#cfeaf4"/><circle cx="224" cy="230" r="9" fill="#5bb8d4"/><text x="242" y="235" font-size="14" font-weight="700" fill="#0d1a08" font-family="sans-serif">Bills</text></g>
+  <path d="M150 70c20 0 30 0 50 0M150 150c20 0 40 0 70 0M150 230c20 0 20 0 50 0" stroke="#2f6b0a" stroke-width="2.5" stroke-dasharray="5 6" stroke-linecap="round"/>
+  <circle cx="60" cy="300" r="4" fill="#a99bf0"/><circle cx="380" cy="30" r="6" fill="#f3dc6b"/>
+</svg>
+{% endmacro %}
+
+{% macro calendar() %}
+<svg viewBox="0 0 400 320" aria-hidden="true" fill="none">
+  <rect x="50" y="50" width="250" height="230" rx="22" fill="#fff" stroke="#e3ebd8" stroke-width="2"/>
+  <path d="M50 100h250V72a22 22 0 0 0-22-22H72a22 22 0 0 0-22 22z" fill="#2f6b0a"/>
+  <rect x="92" y="34" width="10" height="36" rx="5" fill="#0d1a08"/><rect x="248" y="34" width="10" height="36" rx="5" fill="#0d1a08"/>
+  <g fill="#e8f2dc"><rect x="76" y="124" width="36" height="30" rx="8"/><rect x="124" y="124" width="36" height="30" rx="8"/><rect x="172" y="124" width="36" height="30" rx="8"/><rect x="220" y="124" width="36" height="30" rx="8"/>
+  <rect x="76" y="166" width="36" height="30" rx="8"/><rect x="124" y="166" width="36" height="30" rx="8"/><rect x="220" y="166" width="36" height="30" rx="8"/>
+  <rect x="76" y="208" width="36" height="30" rx="8"/><rect x="124" y="208" width="36" height="30" rx="8"/><rect x="172" y="208" width="36" height="30" rx="8"/></g>
+  <rect x="172" y="166" width="36" height="30" rx="8" fill="#b8f06f"/><circle class="pulse" cx="190" cy="181" r="14" stroke="#2f6b0a" stroke-width="2"/>
+  <g class="fl"><circle cx="320" cy="90" r="34" fill="#f3dc6b"/><path d="M320 70v-4m-14 28c0 10 4 14 14 14s14-4 14-14c0-12-4-22-14-22s-14 10-14 22zm-4 14h36" stroke="#8a6d0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g>
+  <g class="fl2"><rect x="250" y="236" width="120" height="44" rx="14" fill="#fff" stroke="#e3ebd8" stroke-width="2"/><circle cx="274" cy="258" r="11" fill="#ffd9ad"/><path d="M296 252h56M296 264h36" stroke="#d6e4c4" stroke-width="6" stroke-linecap="round"/></g>
+</svg>
+{% endmacro %}
+
+{% macro ring() %}
+<svg viewBox="0 0 400 320" aria-hidden="true" fill="none">
+  <circle cx="190" cy="160" r="100" stroke="#eaf3de" stroke-width="30"/>
+  <circle class="draw" cx="190" cy="160" r="100" stroke="url(#g1)" stroke-width="30" stroke-linecap="round" stroke-dasharray="628" stroke-dashoffset="150" transform="rotate(-90 190 160)"/>
+  <defs><linearGradient id="g1" x1="0" x2="1"><stop stop-color="#b8f06f"/><stop offset="1" stop-color="#2f6b0a"/></linearGradient></defs>
+  <text x="190" y="155" text-anchor="middle" font-size="44" font-weight="700" fill="#0d1a08" font-family="sans-serif">76%</text>
+  <text x="190" y="182" text-anchor="middle" font-size="14" fill="#667a5c" font-family="sans-serif">of Food budget</text>
+  <g class="fl"><rect x="280" y="40" width="100" height="44" rx="14" fill="#fff" stroke="#e3ebd8" stroke-width="2"/><path d="M298 62h16m-8-8v16" stroke="#e0803f" stroke-width="3" stroke-linecap="round"/><path d="M326 62h36" stroke="#d6e4c4" stroke-width="6" stroke-linecap="round"/></g>
+  <g class="fl2"><circle cx="70" cy="70" r="20" fill="#a99bf0" opacity=".35"/><circle cx="330" cy="260" r="26" fill="#f3dc6b" opacity=".55"/></g>
+</svg>
+{% endmacro %}
+
+{% macro loop() %}
+<svg viewBox="0 0 400 320" aria-hidden="true" fill="none">
+  <circle cx="200" cy="160" r="96" stroke="#e3ebd8" stroke-width="3" stroke-dasharray="4 10"/>
+  <g class="spin" style="transform-origin:200px 160px"><path d="M200 64a96 96 0 0 1 83 48" stroke="#2f6b0a" stroke-width="6" stroke-linecap="round"/><path d="M270 98l16 16-22 4z" fill="#2f6b0a"/>
+  <path d="M200 256a96 96 0 0 1-83-48" stroke="#e0803f" stroke-width="6" stroke-linecap="round"/><path d="M130 222l-16-16 22-4z" fill="#e0803f"/></g>
+  <rect x="150" y="125" width="100" height="70" rx="16" fill="#fff" stroke="#e3ebd8" stroke-width="2"/><text x="200" y="168" text-anchor="middle" font-size="30" font-weight="700" fill="#0d1a08" font-family="sans-serif">&#8635;</text>
+  <g class="fl"><rect x="20" y="40" width="110" height="40" rx="12" fill="#b8f06f"/><text x="75" y="65" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1a08" font-family="sans-serif">Rent · monthly</text></g>
+  <g class="fl2"><rect x="270" y="236" width="110" height="40" rx="12" fill="#cfeaf4"/><text x="325" y="261" text-anchor="middle" font-size="13" font-weight="700" fill="#0d1a08" font-family="sans-serif">Salary · weekly</text></g>
+</svg>
+{% endmacro %}
+
+{% macro mail() %}
+<svg viewBox="0 0 300 240" aria-hidden="true" fill="none">
+  <rect x="40" y="60" width="200" height="140" rx="20" fill="#fff" stroke="#e3ebd8" stroke-width="2"/>
+  <path d="M46 72l94 70 94-70" stroke="#2f6b0a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <g class="fl"><circle cx="240" cy="60" r="26" fill="#b8f06f"/><path d="M229 60l8 8 14-16" stroke="#0d1a08" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></g>
+  <circle class="fl2" cx="50" cy="38" r="8" fill="#f3dc6b"/>
+</svg>
+{% endmacro %}
+
+{% macro question() %}
+<svg viewBox="0 0 300 240" aria-hidden="true" fill="none">
+  <g class="fl"><rect x="30" y="40" width="170" height="90" rx="26" fill="#fff" stroke="#e3ebd8" stroke-width="2"/><path d="M70 130l-6 30 36-30" fill="#fff" stroke="#e3ebd8" stroke-width="2"/>
+  <text x="115" y="102" text-anchor="middle" font-size="52" font-weight="700" fill="#2f6b0a" font-family="sans-serif">?</text></g>
+  <g class="fl2"><rect x="150" y="130" width="120" height="70" rx="22" fill="#b8f06f"/><path d="M230 200l8 24-30-24" fill="#b8f06f"/><path d="M175 156h70M175 176h44" stroke="#2f6b0a" stroke-width="6" stroke-linecap="round"/></g>
+</svg>
+{% endmacro %}
+
+{% macro shield() %}
+<svg viewBox="0 0 300 240" aria-hidden="true" fill="none">
+  <path d="M150 30l86 30v60c0 52-36 84-86 100-50-16-86-48-86-100V60z" fill="#fff" stroke="#e3ebd8" stroke-width="2"/>
+  <path class="fl" d="M150 56l58 20v44c0 36-24 58-58 70-34-12-58-34-58-70V76z" fill="#eaf3de"/>
+  <path class="draw" d="M120 124l22 22 40-46" stroke="#2f6b0a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="120" stroke-dashoffset="0"/>
+</svg>
+{% endmacro %}
+
+{% macro auth() %}
+<svg viewBox="0 0 420 300" aria-hidden="true" fill="none">
+  <rect x="90" y="60" width="220" height="190" rx="26" fill="#fff" stroke="#e3ebd8" stroke-width="2"/>
+  <circle cx="200" cy="140" r="26" fill="#b8f06f"/><rect x="190" y="150" width="20" height="26" rx="6" fill="#2f6b0a"/><path d="M186 140v-8a14 14 0 0 1 28 0v8" stroke="#2f6b0a" stroke-width="5" stroke-linecap="round"/>
+  <path d="M130 206h140M150 226h100" stroke="#d6e4c4" stroke-width="8" stroke-linecap="round"/>
+  <g class="fl"><circle cx="330" cy="70" r="28" fill="#f3dc6b"/><text x="330" y="80" text-anchor="middle" font-size="26" font-weight="700" fill="#8a6d0a" font-family="sans-serif">$</text></g>
+  <g class="fl2"><circle cx="70" cy="200" r="22" fill="#ffd9ad"/><circle cx="350" cy="220" r="12" fill="#a99bf0" opacity=".6"/></g>
+</svg>
+{% endmacro %}
+
+{% macro lost() %}
+<svg viewBox="0 0 360 240" aria-hidden="true" fill="none">
+  <text x="180" y="150" text-anchor="middle" font-size="130" font-weight="800" fill="#eaf3de" font-family="sans-serif">404</text>
+  <g class="fl"><circle cx="180" cy="110" r="46" fill="#f3dc6b" stroke="#e6c84b" stroke-width="3"/><text x="180" y="124" text-anchor="middle" font-size="40" font-weight="700" fill="#8a6d0a" font-family="sans-serif">?</text></g>
+  <ellipse class="fl2" cx="180" cy="210" rx="60" ry="8" fill="#e3ebd8"/>
+</svg>
+{% endmacro %}

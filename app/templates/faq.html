@@ -1,7 +1,8 @@
 {% extends "public_base.html" %}
+{% from "_art.html" import question %}
 {% block title %}FAQ · AI Finance Tracker{% endblock %}
 {% block content %}
-<div class="pagehead"><div class="wrap"><span class="eyebrow">Support</span><h1>Frequently asked questions</h1></div></div>
+<div class="pagehead"><div class="wrap"><div><span class="eyebrow pill" data-reveal>Support</span><h1 data-reveal style="--d:.08s">Frequently asked questions</h1></div><div data-reveal="zoom" aria-hidden="true">{{ question() }}</div></div></div>
 <div class="wrap"><div class="content">
 
 {% for q, a in faqs %}

@@ -1,7 +1,8 @@
 {% extends "public_base.html" %}
+{% from "_art.html" import calendar %}
 {% block title %}Features · AI Finance Tracker{% endblock %}
 {% block content %}
-<div class="pagehead"><div class="wrap"><span class="eyebrow">Product</span><h1>Features</h1></div></div>
+<div class="pagehead"><div class="wrap"><div><span class="eyebrow pill" data-reveal>Product</span><h1 data-reveal style="--d:.08s">Features</h1></div><div data-reveal="zoom" aria-hidden="true">{{ calendar() }}</div></div></div>
 <div class="wrap"><div class="content wide">
 
 <div class="cards3">

@@ -25,4 +25,11 @@ def create_app(config=None):
 
     from .routes import bp
     app.register_blueprint(bp)
+
+    @app.errorhandler(404)
+    def not_found(_):
+        from flask import jsonify, render_template, request
+        if request.path.startswith("/api/"):
+            return jsonify(error="not found"), 404
+        return render_template("notfound.html"), 404
     return app
