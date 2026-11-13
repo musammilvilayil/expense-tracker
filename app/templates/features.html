@@ -1,0 +1,16 @@
+{% extends "public_base.html" %}
+{% block title %}Features · AI Finance Tracker{% endblock %}
+{% block content %}
+<h1>Features</h1>
+<div class="cards3">
+  <article class="card"><h2>Import or add</h2><p>Add transactions by hand or upload a CSV (<code>date, description, amount</code>). Dates are normalized and duplicates removed.</p></article>
+  <article class="card"><h2>AI categorization</h2><p>A TF-IDF and logistic-regression model labels each expense. Fix a label once and similar ones follow.</p></article>
+  <article class="card"><h2>Subscriptions</h2><p>Weekly, monthly, quarterly and yearly recurring charges are found automatically with monthly cost and next renewal.</p></article>
+  <article class="card"><h2>Budgets</h2><p>Set monthly limits per category and see warnings at 80% and 100%.</p></article>
+  <article class="card"><h2>Reports and charts</h2><p>Monthly and yearly summaries, category breakdown, income versus expense trend and savings rate.</p></article>
+  <article class="card"><h2>Unusual spending</h2><p>Charges far above your normal amount for a category are flagged, with the typical amount shown.</p></article>
+  <article class="card"><h2>Recommendations</h2><p>Plain-language tips on savings rate, dominant categories, rising spend and subscription cost.</p></article>
+  <article class="card"><h2>Autopay rules</h2><p>Recurring income and expenses are recorded on their due dates, and can be paused or deleted.</p></article>
+</div>
+<p><a class="btn" href="/login">Create a free account</a></p>
+{% endblock %}

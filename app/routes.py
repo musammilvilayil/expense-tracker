@@ -85,6 +85,31 @@ def run_autopay(uid, today=None):
 
 # ---------- pages & auth ----------
 @bp.get("/")
+def landing():
+    return render_template("landing.html")
+
+
+@bp.get("/features")
+def features():
+    return render_template("features.html")
+
+
+@bp.get("/how-it-works")
+def how_it_works():
+    return render_template("how.html")
+
+
+@bp.get("/about")
+def about():
+    return render_template("about.html")
+
+
+@bp.get("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
+@bp.get("/dashboard")
 @login_required
 def index():
     return render_template("dashboard.html", username=session["username"],
@@ -93,6 +118,8 @@ def index():
 
 @bp.get("/login")
 def login_page():
+    if "user_id" in session:
+        return redirect("/dashboard")
     return render_template("login.html")
 
 

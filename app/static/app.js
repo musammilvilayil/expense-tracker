@@ -71,5 +71,5 @@ $('#ap').addEventListener('click', guard(async e => {
   else if (t.dataset.apdel) await api('/api/autopay/' + t.dataset.apdel, {method: 'DELETE'});
 }));
 $('#month').addEventListener('change', refresh);
-$('#logout').addEventListener('click', async () => { await fetch('/api/logout', {method: 'POST'}); location.href = '/login'; });
+$('#logout').addEventListener('click', async () => { await fetch('/api/logout', {method: 'POST'}); location.href = '/'; });
 refresh();

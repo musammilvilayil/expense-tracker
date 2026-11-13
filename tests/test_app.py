@@ -108,3 +108,19 @@ def test_autopay_validation_and_isolation(client):
     bob = client.application.test_client()
     bob.post("/api/register", json={"username": "bobby", "password": "password123"})
     assert bob.delete(f"/api/autopay/{aid}").status_code == 404
+
+
+@pytest.mark.parametrize("path", ["/", "/features", "/how-it-works", "/about", "/privacy", "/login"])
+def test_public_pages_open_without_login(tmp_path, path):
+    c = create_app({"TESTING": True, "DATABASE": str(tmp_path / "p.sqlite")}).test_client()
+    r = c.get(path)
+    assert r.status_code == 200 and b"<title>" in r.data
+
+
+def test_dashboard_requires_login_and_nav_changes(client, tmp_path):
+    anon = create_app({"TESTING": True, "DATABASE": str(tmp_path / "q.sqlite")}).test_client()
+    assert anon.get("/dashboard").status_code == 302
+    assert b"Sign in" in anon.get("/").data
+    assert client.get("/dashboard").status_code == 200
+    assert b'href="/dashboard"' in client.get("/").data
+    assert client.get("/login").status_code == 302

@@ -1,0 +1,18 @@
+{% extends "public_base.html" %}
+{% block title %}Privacy · AI Finance Tracker{% endblock %}
+{% block content %}
+<h1>Privacy</h1>
+<p>This is a student project, not a commercial service. This page describes what the software does today.</p>
+<h2>What is stored</h2>
+<ul><li>Your username and a salted password hash. Your password is never stored in plain text.</li>
+<li>The transactions, budgets and autopay rules you enter or import.</li></ul>
+<h2>How it is used</h2>
+<ul><li>Only to show your own dashboard, categorize your expenses and find your subscriptions.</li>
+<li>The ML runs inside the application. Your data is not sent to third-party AI services.</li>
+<li>Each account sees only its own data.</li></ul>
+<h2>What is not collected</h2>
+<p>No bank credentials, card numbers or contact lists. Importing a CSV is the only way bank data enters the system.</p>
+<h2>Your control</h2>
+<p>You can delete any transaction or autopay rule at any time. Account deletion and data export are planned but not yet available.</p>
+<p>Because financial data is sensitive, use a unique password, and do not enter real data on a deployment that is not served over HTTPS.</p>
+{% endblock %}

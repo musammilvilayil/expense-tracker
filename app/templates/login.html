@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="/static/style.css"></head>
 <body class="auth">
 <main class="card">
-  <h1>AI Finance &amp; Subscription Tracker</h1>
+  <p><a href="/">&larr; Home</a></p><h1>AI Finance &amp; Subscription Tracker</h1>
   <form id="f">
     <label>Username <input name="username" required minlength="3" autocomplete="username"></label>
     <label>Password <input name="password" type="password" required minlength="8" autocomplete="current-password"></label>
@@ -20,6 +20,6 @@ f.addEventListener('submit',async e=>{
   e.preventDefault();
   const r=await fetch('/api/'+act,{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify(Object.fromEntries(new FormData(f)))});
-  if(r.ok) location.href='/'; else document.getElementById('msg').textContent=(await r.json()).error;
+  if(r.ok) location.href='/dashboard'; else document.getElementById('msg').textContent=(await r.json()).error;
 });
 </script></body></html>

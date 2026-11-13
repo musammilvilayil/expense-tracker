@@ -1,0 +1,14 @@
+{% extends "public_base.html" %}
+{% block title %}How it works · AI Finance Tracker{% endblock %}
+{% block content %}
+<h1>How it works</h1>
+<ol class="steps">
+  <li><h2>1. Collect</h2><p>Create an account, then add transactions or import a CSV.</p></li>
+  <li><h2>2. Clean</h2><p>Dates and descriptions are normalized and duplicates dropped.</p></li>
+  <li><h2>3. Categorize</h2><p>The ML model assigns a category to every expense.</p></li>
+  <li><h2>4. Detect subscriptions</h2><p>Charges that repeat at a regular interval with a steady amount are flagged.</p></li>
+  <li><h2>5. Analyze</h2><p>Spending patterns, budgets and outliers are computed per category.</p></li>
+  <li><h2>6. Act</h2><p>See your dashboard, alerts and recommendations, and adjust budgets or cancel subscriptions.</p></li>
+</ol>
+<p>Raw financial data becomes actionable information. <a href="/login">Try it</a>.</p>
+{% endblock %}
