@@ -1,7 +1,9 @@
 {% extends "public_base.html" %}
 {% block title %}Privacy · AI Finance Tracker{% endblock %}
 {% block content %}
-<h1>Privacy</h1>
+<div class="pagehead"><div class="wrap"><span class="eyebrow">Legal</span><h1>Privacy</h1></div></div>
+<div class="wrap"><div class="content">
+
 <p>This is a student project, not a commercial service. This page describes what the software does today.</p>
 <h2>What is stored</h2>
 <ul><li>Your username and a salted password hash. Your password is never stored in plain text.</li>
@@ -15,4 +17,5 @@
 <h2>Your control</h2>
 <p>You can delete any transaction or autopay rule at any time. Account deletion and data export are planned but not yet available.</p>
 <p>Because financial data is sensitive, use a unique password, and do not enter real data on a deployment that is not served over HTTPS.</p>
+</div></div>
 {% endblock %}

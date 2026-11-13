@@ -1,14 +1,45 @@
 {% extends "public_base.html" %}
 {% block content %}
-<section class="hero">
-  <h1>Know where your money goes, and what keeps charging you.</h1>
-  <p>Import your transactions and the tracker categorizes them, finds your subscriptions, warns you about unusual spending and suggests where to save.</p>
-  <p><a class="btn big" href="/login">Get started</a> <a class="btn big secondary" href="/how-it-works">See how it works</a></p>
-</section>
-<section class="cards3">
-  <article class="card"><h2>Automatic categories</h2><p>An ML model sorts expenses into Food, Transport, Shopping, Bills and more, and learns from your corrections.</p></article>
-  <article class="card"><h2>Subscription finder</h2><p>Repeated charges are detected with their yearly cost and next renewal date, so nothing renews unnoticed.</p></article>
-  <article class="card"><h2>Smart alerts</h2><p>Budget warnings, unusual charges and personalised tips, each with a reason you can read.</p></article>
-  <article class="card"><h2>Autopay rules</h2><p>Record rent, EMIs and salary on schedule automatically. Nothing is paid from a real account.</p></article>
-</section>
+<section class="hero"><div class="wrap">
+  <span class="eyebrow">AI personal finance</span>
+  <h1>The smarter way to understand your money.</h1>
+  <p class="lead">Import your transactions and let machine learning categorize them, find your subscriptions and flag unusual spending, all explained in plain language.</p>
+  <div class="actions"><a class="btn big" href="/login">Get started</a><a class="btn big secondary" href="/how-it-works">See how it works</a></div>
+</div></section>
+<div class="trust">No bank passwords &middot; Your data stays in your account &middot; Open and explainable</div>
+
+<section class="band"><div class="wrap split">
+  <div><span class="eyebrow">Categorize</span><h2>Every expense, sorted automatically.</h2>
+    <p>A model reads each description and assigns Food, Transport, Shopping, Bills and more. Correct one label and it learns your habits.</p>
+    <a class="btn dark" href="/features">Learn more</a></div>
+  <div class="panel" aria-hidden="true">
+    <div class="row"><span>Swiggy order</span><b>Food</b></div><div class="row"><span>Uber ride</span><b>Transport</b></div>
+    <div class="row"><span>Netflix</span><b>Entertainment</b></div><div class="row"><span>Electricity bill</span><b>Bills</b></div></div>
+</div></section>
+
+<section class="band"><div class="wrap split">
+  <div class="panel" aria-hidden="true">
+    <div class="row"><span>Netflix &middot; monthly</span><b>Renews in 3 days</b></div><div class="row"><span>Gym &middot; quarterly</span><b>Renews in 41 days</b></div>
+    <div class="row"><span>Cloud storage &middot; yearly</span><b>Renews in 212 days</b></div></div>
+  <div><span class="eyebrow">Subscriptions</span><h2>Find what keeps charging you.</h2>
+    <p>Repeated charges are detected with their yearly cost and next renewal date, so nothing renews unnoticed.</p>
+    <a class="btn dark" href="/features">Learn more</a></div>
+</div></section>
+
+<section class="band"><div class="wrap split">
+  <div><span class="eyebrow">Budgets &amp; alerts</span><h2>Know before you overspend.</h2>
+    <p>Set monthly category budgets and get warnings at 80% and 100%, plus alerts for charges far above your normal.</p>
+    <a class="btn dark" href="/features">Learn more</a></div>
+  <div class="panel" aria-hidden="true"><div class="row"><span>Food budget</span><b>84%</b></div><div class="bar warning"><i style="width:84%"></i></div>
+    <div class="row"><span>Unusual charge</span><b>400 vs typical 12</b></div></div>
+</div></section>
+
+<section class="band"><div class="wrap"><div class="stats">
+  <div><div class="stat">8</div><span class="eyebrow">Spending categories</span></div>
+  <div><div class="stat">4</div><span class="eyebrow">Recurring frequencies</span></div>
+  <div><div class="stat">0</div><span class="eyebrow">Bank credentials needed</span></div>
+</div></div></section>
+
+<section class="cta"><h2>Take control of your spending.</h2><p>Create a free account and import your first statement in minutes.</p>
+  <a class="btn big" href="/login">Get started</a></section>
 {% endblock %}

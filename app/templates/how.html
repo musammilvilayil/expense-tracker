@@ -1,7 +1,9 @@
 {% extends "public_base.html" %}
 {% block title %}How it works · AI Finance Tracker{% endblock %}
 {% block content %}
-<h1>How it works</h1>
+<div class="pagehead"><div class="wrap"><span class="eyebrow">Product</span><h1>How it works</h1></div></div>
+<div class="wrap"><div class="content">
+
 <ol class="steps">
   <li><h2>1. Collect</h2><p>Create an account, then add transactions or import a CSV.</p></li>
   <li><h2>2. Clean</h2><p>Dates and descriptions are normalized and duplicates dropped.</p></li>
@@ -11,4 +13,5 @@
   <li><h2>6. Act</h2><p>See your dashboard, alerts and recommendations, and adjust budgets or cancel subscriptions.</p></li>
 </ol>
 <p>Raw financial data becomes actionable information. <a href="/login">Try it</a>.</p>
+</div></div>
 {% endblock %}

@@ -1,7 +1,9 @@
 {% extends "public_base.html" %}
 {% block title %}Contact · AI Finance Tracker{% endblock %}
 {% block content %}
-<h1>Contact us</h1>
+<div class="pagehead"><div class="wrap"><span class="eyebrow">Support</span><h1>Contact us</h1></div></div>
+<div class="wrap"><div class="content">
+
 {% if sent %}<p class="card" role="status">Thanks! Your message has been received.</p>{% endif %}
 {% if errors %}<div class="alert" role="alert"><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
 <form method="post" class="card cform" novalidate>
@@ -12,4 +14,5 @@
   <div class="hp" aria-hidden="true"><label>Leave blank <input name="website" tabindex="-1" autocomplete="off"></label></div>
   <button type="submit">Send message</button>
 </form>
+</div></div>
 {% endblock %}

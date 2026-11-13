@@ -3,10 +3,10 @@
 <title>Dashboard · Finance Tracker</title>
 <link rel="stylesheet" href="/static/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script></head>
-<body>
-<header><h1>AI Finance Tracker</h1>
-  <div><input type="month" id="month"> <span>{{ username }}</span> <button id="logout" class="secondary">Sign out</button></div></header>
-<main>
+<body class="app">
+<header class="apptop"><a class="brand" href="/"><i></i>AI Finance Tracker</a>
+  <div><label for="month" class="eyebrow" style="color:#b3c5a0">Month</label><input type="month" id="month"> <span>{{ username }}</span> <button id="logout" class="secondary">Sign out</button></div></header>
+<main class="appmain">
   <section id="alerts" aria-live="polite"></section>
   <section class="grid kpis">
     <div class="card"><h3>Income</h3><p id="k-inc">–</p></div>
@@ -15,8 +15,8 @@
     <div class="card"><h3>Savings rate</h3><p id="k-rate">–</p></div>
   </section>
   <section class="grid two">
-    <div class="card"><h2>Spending by category</h2><canvas id="c-cat" height="220"></canvas></div>
-    <div class="card"><h2>Monthly trend</h2><canvas id="c-trend" height="220"></canvas></div>
+    <div class="card"><h2>Spending by category</h2><div class="chartbox"><canvas id="c-cat"></canvas></div></div>
+    <div class="card"><h2>Monthly trend</h2><div class="chartbox"><canvas id="c-trend"></canvas></div></div>
   </section>
   <section class="grid two">
     <div class="card"><h2>Recommendations</h2><ul id="recs"></ul></div>

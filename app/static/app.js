@@ -11,6 +11,7 @@ const api = async (url, opt = {}) => {
 const json = (method, body) => ({method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
 const status = (m, bad) => { const el = $('#status'); el.textContent = m; el.className = bad ? 'err' : ''; };
 let charts = {};
+const PAL = ['#3f7308', '#b2eb76', '#4fa68f', '#c9753d', '#ebe46a', '#b3c5a0', '#18280e', '#d0c4a5'];
 $('#month').value = new Date().toISOString().slice(0, 7);
 
 function chart(id, cfg) { charts[id]?.destroy(); if (window.Chart) charts[id] = new Chart($(id), cfg); }
@@ -41,11 +42,11 @@ async function refresh() {
     ? ins.budgets.map(b => `<div><div>${esc(b.category)}: ${money(b.spent)} / ${money(b.limit)}</div><div class="bar ${b.status}"><i style="width:${Math.min(b.percent, 100)}%"></i></div></div>`).join('')
     : '<p>No budgets set.</p>';
 
-  chart('#c-cat', {type: 'doughnut', data: {labels: Object.keys(s.by_category), datasets: [{data: Object.values(s.by_category)}]}});
+  chart('#c-cat', {type: 'doughnut', options: {maintainAspectRatio: false}, data: {labels: Object.keys(s.by_category), datasets: [{data: Object.values(s.by_category), backgroundColor: PAL, borderColor: '#fff'}]}});
   const months = Object.keys(ins.yearly.by_month);
-  chart('#c-trend', {type: 'bar', data: {labels: months, datasets: [
-    {label: 'Income', data: months.map(m => ins.yearly.by_month[m].income), backgroundColor: '#2b8a3e'},
-    {label: 'Expense', data: months.map(m => ins.yearly.by_month[m].expense), backgroundColor: '#c92a2a'}]}});
+  chart('#c-trend', {type: 'bar', options: {maintainAspectRatio: false}, data: {labels: months, datasets: [
+    {label: 'Income', data: months.map(m => ins.yearly.by_month[m].income), backgroundColor: '#3f7308'},
+    {label: 'Expense', data: months.map(m => ins.yearly.by_month[m].expense), backgroundColor: '#c9753d'}]}});
 
   $('#tx tbody').innerHTML = txs.slice(0, 100).map(t => `<tr><td>${t.date}</td><td>${esc(t.description)}</td>
     <td class="${t.type === 'income' ? 'pos' : ''}">${t.type === 'income' ? '+' : '-'}${money(t.amount)}</td>

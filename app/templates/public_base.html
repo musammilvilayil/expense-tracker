@@ -3,14 +3,27 @@
 <title>{% block title %}AI Finance &amp; Subscription Tracker{% endblock %}</title>
 <meta name="description" content="{% block desc %}Track expenses, find forgotten subscriptions and get personalised spending insights.{% endblock %}">
 <link rel="stylesheet" href="/static/style.css"></head>
-<body class="public">
+<body>
 <a class="skip" href="#content">Skip to content</a>
-<header class="pubnav"><a class="brand" href="/">AI Finance Tracker</a>
+<div class="announce"><a href="/features">New: autopay rules record your recurring payments automatically &rarr;</a></div>
+<header class="pubnav"><a class="brand" href="/"><i></i>AI Finance Tracker</a>
   <nav aria-label="Main">
-    <a href="/features">Features</a><a href="/how-it-works">How it works</a><a href="/about">About</a><a href="/faq">FAQ</a><a href="/contact">Contact</a>
+    {% set p = request.path %}
+    <a href="/features" {% if p=='/features' %}aria-current="page"{% endif %}>Features</a>
+    <a href="/how-it-works" {% if p=='/how-it-works' %}aria-current="page"{% endif %}>How it works</a>
+    <a href="/about" {% if p=='/about' %}aria-current="page"{% endif %}>About</a>
+    <a href="/faq" {% if p=='/faq' %}aria-current="page"{% endif %}>FAQ</a>
+    <a href="/contact" {% if p=='/contact' %}aria-current="page"{% endif %}>Contact</a>
     {% if session.get('user_id') %}<a class="btn" href="/dashboard">Dashboard</a>{% else %}<a class="btn" href="/login">Sign in</a>{% endif %}
   </nav></header>
 <main id="content" class="pubmain">{% block content %}{% endblock %}</main>
-<footer class="pubfoot"><p>CSE final-year project. Recommendations are guidance, not professional financial advice.</p>
-  <p><a href="/features">Features</a> · <a href="/how-it-works">How it works</a> · <a href="/about">About</a> · <a href="/faq">FAQ</a> · <a href="/contact">Contact</a> · <a href="/privacy">Privacy</a></p></footer>
+<footer class="pubfoot">
+  <div class="cols">
+    <div><a class="brand" href="/"><i></i>AI Finance Tracker</a><p>Understand your money.<br>Never miss a renewal.</p></div>
+    <div><span class="eyebrow">Product</span><a href="/features">Features</a><a href="/how-it-works">How it works</a><a href="/login">Sign in</a></div>
+    <div><span class="eyebrow">Company</span><a href="/about">About</a><a href="/faq">FAQ</a><a href="/contact">Contact</a></div>
+    <div><span class="eyebrow">Legal</span><a href="/privacy">Privacy</a></div>
+  </div>
+  <small>CSE final-year project. Recommendations are guidance, not professional financial advice.</small>
+</footer>
 </body></html>

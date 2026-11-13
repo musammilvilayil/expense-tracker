@@ -1,7 +1,9 @@
 {% extends "public_base.html" %}
 {% block title %}Features · AI Finance Tracker{% endblock %}
 {% block content %}
-<h1>Features</h1>
+<div class="pagehead"><div class="wrap"><span class="eyebrow">Product</span><h1>Features</h1></div></div>
+<div class="wrap"><div class="content wide">
+
 <div class="cards3">
   <article class="card"><h2>Import or add</h2><p>Add transactions by hand or upload a CSV (<code>date, description, amount</code>). Dates are normalized and duplicates removed.</p></article>
   <article class="card"><h2>AI categorization</h2><p>A TF-IDF and logistic-regression model labels each expense. Fix a label once and similar ones follow.</p></article>
@@ -13,4 +15,5 @@
   <article class="card"><h2>Autopay rules</h2><p>Recurring income and expenses are recorded on their due dates, and can be paused or deleted.</p></article>
 </div>
 <p><a class="btn" href="/login">Create a free account</a></p>
+</div></div>
 {% endblock %}

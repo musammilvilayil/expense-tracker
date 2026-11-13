@@ -1,16 +1,26 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sign in · Finance Tracker</title>
+<title>Sign in · AI Finance Tracker</title>
 <link rel="stylesheet" href="/static/style.css"></head>
 <body class="auth">
-<main class="card">
-  <p><a href="/">&larr; Home</a></p><h1>AI Finance &amp; Subscription Tracker</h1>
+<aside class="auth-side">
+  <a class="brand" href="/"><i></i>AI Finance Tracker</a>
+  <div><h2>Understand your money. Never miss a renewal.</h2>
+    <p>Categorize expenses, find subscriptions and get clear, explainable insights.</p></div>
+  <small>CSE final-year project</small>
+</aside>
+<main class="auth-main">
   <form id="f">
+    <span class="eyebrow">Welcome</span>
+    <h1>Sign in or create an account</h1>
     <label>Username <input name="username" required minlength="3" autocomplete="username"></label>
     <label>Password <input name="password" type="password" required minlength="8" autocomplete="current-password"></label>
     <p id="msg" role="alert" class="err"></p>
-    <button type="submit" data-act="login">Sign in</button>
-    <button type="submit" data-act="register" class="secondary">Create account</button>
+    <div class="actions">
+      <button type="submit" data-act="login">Sign in</button>
+      <button type="submit" data-act="register" class="secondary">Create account</button>
+    </div>
+    <p><a href="/">&larr; Back to home</a></p>
   </form>
 </main>
 <script>

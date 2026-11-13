@@ -20,6 +20,8 @@ pip install -r requirements.txt
 python run.py          # http://localhost:5000
 python -m pytest
 ```
+Public pages: `/`, `/features`, `/how-it-works`, `/about`, `/faq`, `/contact`, `/privacy`. The UI uses a sage/forest palette inspired by spade.com (layout and style only; all copy and branding are this project's own).
+
 Set `SECRET_KEY` in the environment for stable sessions across restarts.
 
 CSV format: `date,description,amount[,type]`. Without a `type` column, negative amounts are expenses.
