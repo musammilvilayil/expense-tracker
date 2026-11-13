@@ -1,11 +1,11 @@
 import functools
-from datetime import date
+from datetime import date, datetime
 
 from flask import Blueprint, jsonify, redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
-from .ml import analysis, categorizer, subscriptions
+from .ml import analysis, categorizer, recurring, subscriptions
 from .ml.preprocess import clean_description, parse_csv, parse_date
 
 bp = Blueprint("main", __name__)
@@ -64,6 +64,25 @@ def insert_rows(uid, rows):
     db.commit()
 
 
+def run_autopay(uid, today=None):
+    """Record every autopay occurrence that has come due (catches up after downtime)."""
+    today = today or date.today()
+    db = get_db()
+    rules = db.execute("SELECT * FROM autopay WHERE user_id=? AND active=1 AND next_date<=?",
+                       (uid, today.isoformat())).fetchall()
+    created = 0
+    for r in rules:
+        dates, nxt = recurring.due_dates(r["next_date"], r["frequency"], r["anchor_day"], today)
+        for d in dates:
+            db.execute("INSERT INTO transactions(user_id,date,description,amount,type,category,confirmed) "
+                       "VALUES(?,?,?,?,?,?,1)",
+                       (uid, d.isoformat(), r["description"], r["amount"], r["type"], r["category"]))
+            created += 1
+        db.execute("UPDATE autopay SET next_date=? WHERE id=?", (nxt.isoformat(), r["id"]))
+    db.commit()
+    return created
+
+
 # ---------- pages & auth ----------
 @bp.get("/")
 @login_required
@@ -114,6 +133,7 @@ def logout():
 @bp.get("/api/transactions")
 @login_required
 def list_transactions():
+    run_autopay(session["user_id"])
     return jsonify(user_transactions(session["user_id"]))
 
 
@@ -208,6 +228,7 @@ def set_budget():
 @login_required
 def insights():
     uid = session["user_id"]
+    run_autopay(uid)
     month = request.args.get("month") or date.today().strftime("%Y-%m")
     txs = user_transactions(uid)
     budgets = user_budgets(uid)
@@ -222,3 +243,61 @@ def insights():
         "budgets": analysis.budget_status(txs, budgets, month),
         "recommendations": analysis.recommendations(txs, subs, budgets, month),
     })
+
+
+# ---------- autopay ----------
+@bp.get("/api/autopay")
+@login_required
+def list_autopay():
+    run_autopay(session["user_id"])
+    rows = get_db().execute("SELECT id,description,amount,type,category,frequency,next_date,active "
+                            "FROM autopay WHERE user_id=? ORDER BY next_date", (session["user_id"],)).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@bp.post("/api/autopay")
+@login_required
+def add_autopay():
+    d = request.get_json(silent=True) or {}
+    try:
+        start = parse_date(d.get("start_date", ""))
+        amount = abs(float(d.get("amount")))
+    except (TypeError, ValueError) as e:
+        return err(str(e))
+    desc = clean_description(d.get("description", ""))
+    ttype, freq = d.get("type", "expense"), d.get("frequency")
+    if not desc or amount <= 0 or ttype not in ("income", "expense") or freq not in recurring.FREQUENCIES:
+        return err("description, positive amount, type and frequency (weekly/monthly/quarterly/yearly) required")
+    cat = None
+    if ttype == "expense":
+        cat = d.get("category")
+        if cat not in categorizer.CATEGORIES:
+            cat = categorizer.predict(model_for(session["user_id"]), [desc])[0]
+    else:
+        cat = "Income"
+    anchor = datetime.strptime(start, "%Y-%m-%d").day
+    db = get_db()
+    db.execute("INSERT INTO autopay(user_id,description,amount,type,category,frequency,anchor_day,next_date) "
+               "VALUES(?,?,?,?,?,?,?,?)", (session["user_id"], desc, amount, ttype, cat, freq, anchor, start))
+    db.commit()
+    run_autopay(session["user_id"])
+    return jsonify(ok=True), 201
+
+
+@bp.patch("/api/autopay/<int:aid>")
+@login_required
+def toggle_autopay(aid):
+    active = 1 if (request.get_json(silent=True) or {}).get("active") else 0
+    db = get_db()
+    cur = db.execute("UPDATE autopay SET active=? WHERE id=? AND user_id=?", (active, aid, session["user_id"]))
+    db.commit()
+    return jsonify(ok=True) if cur.rowcount else err("not found", 404)
+
+
+@bp.delete("/api/autopay/<int:aid>")
+@login_required
+def delete_autopay(aid):
+    db = get_db()
+    cur = db.execute("DELETE FROM autopay WHERE id=? AND user_id=?", (aid, session["user_id"]))
+    db.commit()
+    return jsonify(ok=True) if cur.rowcount else err("not found", 404)

@@ -61,6 +61,8 @@ Implementation note: add a `role` column to `users` (`user`, `admin`), a `househ
 - Forecasting: next-month spend per category via moving average / regression [Future: LSTM or Prophet].
 - Natural-language assistant ("how much did I spend on food last month?") [Future].
 
+**Autopay / recurring payments**: rules auto-record transactions on due dates, with pause and delete [Built]; real bank mandates (UPI AutoPay / e-NACH) [Future].
+
 **Budgets and goals**: per-category monthly budgets with 80%/100% alerts [Built]; savings goals with progress tracking [Planned]; smart budget suggestions from history [Future].
 
 **Reports**: monthly/yearly summaries and charts [Built]; PDF/CSV export [Planned].

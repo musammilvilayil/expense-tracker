@@ -80,3 +80,31 @@ def test_users_isolated(client, tmp_path):
     bob.post("/api/register", json={"username": "bobby", "password": "password123"})
     assert bob.get("/api/transactions").get_json() == []
     assert bob.delete(f"/api/transactions/{tid}").status_code == 404
+
+
+def test_autopay_schedule_math():
+    from app.ml.recurring import due_dates
+    dates, nxt = due_dates("2026-01-31", "monthly", 31, date(2026, 4, 1))
+    assert [d.isoformat() for d in dates] == ["2026-01-31", "2026-02-28", "2026-03-31"]
+    assert nxt.isoformat() == "2026-04-30"
+
+
+def test_autopay_creates_catches_up_and_pauses(client):
+    start = (date.today() - timedelta(days=65)).isoformat()
+    r = client.post("/api/autopay", json={"description": "Netflix", "amount": 199, "frequency": "monthly", "start_date": start})
+    assert r.status_code == 201
+    txs = client.get("/api/transactions").get_json()
+    assert len(txs) >= 3 and all(t["description"] == "Netflix" for t in txs)
+    assert client.get("/api/transactions").get_json() == txs  # idempotent, no duplicates
+    rule = client.get("/api/autopay").get_json()[0]
+    assert rule["next_date"] > date.today().isoformat()
+    assert client.patch(f"/api/autopay/{rule['id']}", json={"active": False}).status_code == 200
+
+
+def test_autopay_validation_and_isolation(client):
+    assert client.post("/api/autopay", json={"description": "x", "amount": 5, "frequency": "daily", "start_date": "2026-01-01"}).status_code == 400
+    client.post("/api/autopay", json={"description": "Gym", "amount": 50, "frequency": "monthly", "start_date": "2099-01-01"})
+    aid = client.get("/api/autopay").get_json()[0]["id"]
+    bob = client.application.test_client()
+    bob.post("/api/register", json={"username": "bobby", "password": "password123"})
+    assert bob.delete(f"/api/autopay/{aid}").status_code == 404

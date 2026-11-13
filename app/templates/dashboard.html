@@ -28,6 +28,16 @@
       <form id="bf" class="inline"><select name="category">{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select>
       <input name="monthly_limit" type="number" min="0" step="0.01" placeholder="Monthly limit (0 removes)" required><button>Set</button></form></div>
   </section>
+  <section class="card"><h2>Autopay (recurring payments)</h2>
+    <p>Rules record a transaction automatically on each due date. Nothing is paid from a real account.</p>
+    <table id="ap"><thead><tr><th>Name</th><th>Amount</th><th>Every</th><th>Next due</th><th></th></tr></thead><tbody></tbody></table>
+    <form id="af" class="inline">
+      <input name="description" placeholder="e.g. Netflix" required maxlength="120">
+      <input name="amount" type="number" min="0.01" step="0.01" placeholder="Amount" required>
+      <select name="type"><option>expense</option><option>income</option></select>
+      <select name="frequency"><option>monthly</option><option>weekly</option><option>quarterly</option><option>yearly</option></select>
+      <label>First date <input name="start_date" type="date" value="{{ today }}" required></label>
+      <button>Add autopay</button></form></section>
   <section class="card"><h2>Add transaction</h2>
     <form id="tf" class="inline">
       <input name="date" type="date" value="{{ today }}" required>

@@ -25,6 +25,18 @@ CREATE TABLE IF NOT EXISTS budgets (
     monthly_limit REAL NOT NULL CHECK (monthly_limit > 0),
     PRIMARY KEY (user_id, category)
 );
+CREATE TABLE IF NOT EXISTS autopay (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    description TEXT NOT NULL,
+    amount REAL NOT NULL CHECK (amount > 0),
+    type TEXT NOT NULL CHECK (type IN ('income','expense')),
+    category TEXT,
+    frequency TEXT NOT NULL CHECK (frequency IN ('weekly','monthly','quarterly','yearly')),
+    anchor_day INTEGER NOT NULL,
+    next_date TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1
+);
 """
 
 

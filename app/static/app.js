@@ -17,7 +17,8 @@ function chart(id, cfg) { charts[id]?.destroy(); if (window.Chart) charts[id] = 
 
 async function refresh() {
   const month = $('#month').value;
-  const [ins, txs] = await Promise.all([api('/api/insights?month=' + month), api('/api/transactions')]);
+  const [ins, txs, ap] = await Promise.all([api('/api/insights?month=' + month), api('/api/transactions'), api('/api/autopay')]);
+  $('#ap tbody').innerHTML = ap.length ? ap.map(a => `<tr><td>${esc(a.description)}${a.active ? '' : ' (paused)'}</td><td>${a.type === 'income' ? '+' : '-'}${money(a.amount)}</td><td>${a.frequency}</td><td>${a.next_date}</td><td><button class="secondary" data-pause="${a.id}" data-active="${a.active ? 0 : 1}">${a.active ? 'Pause' : 'Resume'}</button> <button class="secondary" data-apdel="${a.id}" aria-label="Delete autopay">×</button></td></tr>`).join('') : '<tr><td colspan="5">No autopay rules.</td></tr>';
   const s = ins.summary;
   $('#k-inc').textContent = money(s.income); $('#k-exp').textContent = money(s.expense);
   $('#k-sav').textContent = money(s.savings); $('#k-sav').className = s.savings < 0 ? 'neg' : 'pos';
@@ -63,6 +64,12 @@ $('#cf').addEventListener('submit', guard(async e => {
 $('#bf').addEventListener('submit', guard(async e => api('/api/budgets', json('PUT', Object.fromEntries(new FormData(e.target))))));
 $('#tx').addEventListener('change', guard(async e => { if (e.target.dataset.id) await api('/api/transactions/' + e.target.dataset.id, json('PATCH', {category: e.target.value})); }));
 $('#tx').addEventListener('click', guard(async e => { const id = e.target.dataset.del; if (id) await api('/api/transactions/' + id, {method: 'DELETE'}); }));
+$('#af').addEventListener('submit', guard(async e => { await api('/api/autopay', json('POST', Object.fromEntries(new FormData(e.target)))); status('Autopay added.'); }));
+$('#ap').addEventListener('click', guard(async e => {
+  const t = e.target;
+  if (t.dataset.pause) await api('/api/autopay/' + t.dataset.pause, json('PATCH', {active: t.dataset.active === '1'}));
+  else if (t.dataset.apdel) await api('/api/autopay/' + t.dataset.apdel, {method: 'DELETE'});
+}));
 $('#month').addEventListener('change', refresh);
 $('#logout').addEventListener('click', async () => { await fetch('/api/logout', {method: 'POST'}); location.href = '/login'; });
 refresh();

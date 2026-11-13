@@ -10,6 +10,7 @@ CSE final-year project. Flask + SQLite backend, scikit-learn for the AI/ML parts
 | Spending analysis & reports | Monthly and yearly summaries, category breakdown, trend chart |
 | Recommendations & anomalies | Rule-based tips; robust median/MAD outlier detection per category (`app/ml/analysis.py`) |
 | Budgets & notifications | Per-category monthly budgets, over-budget alerts and renewals due within 7 days (dashboard alerts) |
+| Autopay | Recurring rules (weekly/monthly/quarterly/yearly) record transactions automatically when due, catch up after downtime, can be paused or deleted (`app/ml/recurring.py`). They record payments only and do not move real money. |
 | Authentication | Registration/login with hashed passwords and per-user data isolation |
 
 ## Run
