@@ -224,3 +224,11 @@ body.app{background:var(--bg)}
 .mini small{color:var(--mut);display:block;min-height:1.3em}
 #f-tips{margin:14px 0 0}
 .risk-over{color:var(--bad);font-weight:600}.risk-warning{color:var(--warn);font-weight:600}
+
+/* settings / forms */
+.pagetitle{font-size:clamp(28px,4vw,40px);margin:0 0 20px}
+.apptop a:not(.brand){color:var(--ink2);text-decoration:none;font-weight:500;padding:6px 10px;border-radius:8px}.apptop a:not(.brand):hover{background:var(--soft)}
+label.fl{display:block;margin:12px 0;font-weight:600}label.fl input{width:100%;margin-top:6px}
+label.check{display:flex;gap:10px;align-items:flex-start;margin:12px 0;font-weight:500}label.check input{margin-top:5px}
+.hint{color:var(--mut);font-size:14px}.okmsg{color:var(--ok)}
+.card.danger{border-color:#f0c4be}button.dangerbtn{background:var(--bad);color:#fff;border-color:var(--bad);box-shadow:none}button.dangerbtn:hover{background:#a33024}

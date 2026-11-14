@@ -2,6 +2,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sign in · AI Finance Tracker</title>
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="/static/csrf.js"></script>
 <script>document.documentElement.classList.add('js')</script>
 <link rel="stylesheet" href="/static/style.css"></head>
 <body class="auth">
@@ -17,12 +19,13 @@
     <h1>Sign in or create an account</h1>
     <label>Username <input name="username" required minlength="3" autocomplete="username"></label>
     <label>Password <input name="password" type="password" required minlength="8" autocomplete="current-password"></label>
+    <label>Email <small>(optional, for password reset and reminders)</small> <input name="email" type="email" maxlength="120" autocomplete="email"></label>
     <p id="msg" role="alert" class="err"></p>
     <div class="actions">
       <button type="submit" data-act="login">Sign in</button>
       <button type="submit" data-act="register" class="secondary">Create account</button>
     </div>
-    <p><a href="/">&larr; Back to home</a></p>
+    <p><a href="/forgot">Forgot password?</a> &nbsp;·&nbsp; <a href="/">&larr; Back to home</a></p>
   </form>
 </main>
 <script src="/static/site.js" defer></script>
@@ -32,7 +35,7 @@ f.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>act=b.dat
 f.addEventListener('submit',async e=>{
   e.preventDefault();
   const r=await fetch('/api/'+act,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(Object.fromEntries(new FormData(f)))});
+    body:JSON.stringify(Object.fromEntries([...new FormData(f)].filter(([k,v])=>act==='register'||k!=='email')))});
   if(r.ok) location.href='/dashboard'; else document.getElementById('msg').textContent=(await r.json()).error;
 });
 </script></body></html>

@@ -4,6 +4,8 @@
 <title>{% block title %}AI Finance &amp; Subscription Tracker{% endblock %}</title>
 <meta name="description" content="{% block desc %}Track expenses, find forgotten subscriptions and get personalised spending insights.{% endblock %}">
 <meta name="theme-color" content="#fbfcf8">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<script src="/static/csrf.js"></script>
 <script>document.documentElement.classList.add('js')</script>
 <link rel="stylesheet" href="/static/style.css"></head>
 <body>

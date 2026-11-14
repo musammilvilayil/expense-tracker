@@ -3,6 +3,6 @@
 {% block title %}Page not found · AI Finance Tracker{% endblock %}
 {% block content %}
 <section class="notfound wrap"><div data-reveal="zoom">{{ lost() }}</div>
-<h1 data-reveal>This page wandered off.</h1><p data-reveal>We could not find what you were looking for.</p>
+<h1 data-reveal>{{ 'Something went wrong.' if message else 'This page wandered off.' }}</h1><p data-reveal>{{ message or 'We could not find what you were looking for.' }}</p>
 <a class="btn big" href="/">Back to home</a></section>
 {% endblock %}

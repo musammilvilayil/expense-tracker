@@ -8,6 +8,7 @@
 {% if sent %}<p class="card" role="status">Thanks! Your message has been received.</p>{% endif %}
 {% if errors %}<div class="alert" role="alert"><ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
 <form method="post" class="card cform" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
   <label>Name <input name="name" value="{{ form.get('name','') }}" maxlength="80" required></label>
   <label>Email <input name="email" type="email" value="{{ form.get('email','') }}" maxlength="120" required></label>
   <label>Subject <input name="subject" value="{{ form.get('subject','') }}" maxlength="120" required></label>

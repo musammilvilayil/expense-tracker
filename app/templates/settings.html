@@ -1,0 +1,41 @@
+{% extends "app_base.html" %}
+{% block title %}Settings · AI Finance Tracker{% endblock %}
+{% block content %}
+<h1 class="pagetitle">Settings</h1>
+<section class="grid two">
+  <div class="card"><h2>Profile &amp; reminders</h2>
+    <form id="pf"><label class="fl">Email <input name="email" type="email" maxlength="120" placeholder="you@example.com"></label>
+      <label class="check"><input type="checkbox" name="notify_email"> Email me reminders (renewals, autopay, budgets, goals)</label>
+      <button>Save</button> <span id="pf-msg" role="status"></span></form>
+    <p class="hint">Your email is used for password reset and reminders. Reminders are sent by the <code>send-reminders</code> command.</p></div>
+  <div class="card"><h2>Change password</h2>
+    <form id="pw"><label class="fl">Current password <input name="current" type="password" required autocomplete="current-password"></label>
+      <label class="fl">New password (8+ characters) <input name="new" type="password" required minlength="8" autocomplete="new-password"></label>
+      <button>Update password</button> <span id="pw-msg" role="status"></span></form></div>
+</section>
+<section class="grid two" style="margin-top:18px">
+  <div class="card"><h2>Your data</h2><p>Download everything stored about you (transactions, budgets, autopay, goals, imports) as a JSON file.</p>
+    <a class="btn secondary" href="/api/account/export" download>Download my data</a></div>
+  <div class="card danger"><h2>Delete account</h2><p>Permanently deletes your account and all data. This cannot be undone.</p>
+    <form id="del"><label class="fl">Confirm with your password <input name="password" type="password" required autocomplete="current-password"></label>
+      <button class="dangerbtn">Delete my account</button> <span id="del-msg" role="alert"></span></form></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(async () => {
+  const a = await api('/api/account');
+  $('#pf [name=email]').value = a.email || ''; $('#pf [name=notify_email]').checked = a.notify_email;
+})();
+$('#pf').addEventListener('submit', async e => { e.preventDefault(); const f = e.target;
+  try { await api('/api/account', json('PATCH', {email: f.email.value, notify_email: f.notify_email.checked})); say('#pf-msg', 'Saved.'); }
+  catch (x) { say('#pf-msg', x.message, true); } });
+$('#pw').addEventListener('submit', async e => { e.preventDefault(); const f = e.target;
+  try { await api('/api/account/password', json('POST', {current: f.current.value, new: f.new.value})); f.reset(); say('#pw-msg', 'Password updated.'); }
+  catch (x) { say('#pw-msg', x.message, true); } });
+$('#del').addEventListener('submit', async e => { e.preventDefault();
+  if (!confirm('Delete your account and all data permanently?')) return;
+  try { await api('/api/account/delete', json('POST', {password: e.target.password.value})); location.href = '/'; }
+  catch (x) { say('#del-msg', x.message, true); } });
+</script>
+{% endblock %}

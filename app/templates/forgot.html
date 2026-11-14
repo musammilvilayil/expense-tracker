@@ -1,0 +1,17 @@
+{% extends "public_base.html" %}
+{% from "_art.html" import mail %}
+{% block title %}Forgot password · AI Finance Tracker{% endblock %}
+{% block content %}
+<div class="pagehead"><div class="wrap"><div><span class="eyebrow pill">Account</span><h1>Forgot your password?</h1></div><div aria-hidden="true">{{ mail() }}</div></div></div>
+<div class="wrap"><div class="content">
+<p>Enter the email on your account and we will send you a link to choose a new password.</p>
+<form id="f" class="card cform"><label>Email <input name="email" type="email" required maxlength="120"></label>
+  <button>Send reset link</button><p id="msg" role="status"></p></form>
+<p><a href="/login">Back to sign in</a></p>
+</div></div>
+<script>
+document.getElementById('f').addEventListener('submit', async e => { e.preventDefault();
+  const r = await fetch('/api/forgot', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email: e.target.email.value})});
+  const j = await r.json(); document.getElementById('msg').textContent = j.message || j.error; });
+</script>
+{% endblock %}

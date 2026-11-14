@@ -3,7 +3,7 @@ import secrets
 
 from flask import Flask
 
-from . import db
+from . import db, security
 
 
 def create_app(config=None):
@@ -14,6 +14,8 @@ def create_app(config=None):
         SECRET_KEY=os.environ.get("SECRET_KEY") or secrets.token_hex(32),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE") == "1",
+        PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 7,
         MAX_CONTENT_LENGTH=2 * 1024 * 1024,
     )
     if config:
@@ -23,7 +25,17 @@ def create_app(config=None):
     with app.app_context():
         db.init_db()
 
+    if app.config.get("TESTING") and not app.config.get("CSRF_STRICT"):
+        from .testing import CsrfClient
+        app.test_client_class = CsrfClient
+
+    app.before_request(security.check_csrf)
+    app.after_request(security.add_headers)
+    app.context_processor(lambda: {"csrf_token": security.csrf_token})
+
+    from .account import bp as account_bp
     from .routes import bp
+    app.register_blueprint(account_bp)
     app.register_blueprint(bp)
 
     @app.errorhandler(404)
