@@ -16,7 +16,7 @@ def create_app(config=None):
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE") == "1",
         PERMANENT_SESSION_LIFETIME=60 * 60 * 24 * 7,
-        MAX_CONTENT_LENGTH=2 * 1024 * 1024,
+        MAX_CONTENT_LENGTH=12 * 1024 * 1024,
     )
     if config:
         app.config.update(config)
@@ -34,8 +34,10 @@ def create_app(config=None):
     app.context_processor(lambda: {"csrf_token": security.csrf_token})
 
     from .account import bp as account_bp
+    from .imports import bp as imports_bp
     from .routes import bp
     app.register_blueprint(account_bp)
+    app.register_blueprint(imports_bp)
     app.register_blueprint(bp)
 
     @app.errorhandler(404)

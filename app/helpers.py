@@ -8,8 +8,8 @@ from .db import get_db
 from .ml import categorizer, recurring
 
 
-def err(msg, code=400, **extra):
-    return jsonify(error=msg, **extra), code
+def err(msg, status=400, **extra):
+    return jsonify(error=msg, **extra), status
 
 
 def current_user():

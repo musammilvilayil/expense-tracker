@@ -102,10 +102,6 @@ const guard = fn => async e => { e.preventDefault(); try { await fn(e); await re
 $('#tf').addEventListener('submit', guard(async e => {
   await api('/api/transactions', json('POST', Object.fromEntries(new FormData(e.target)))); e.target.description.value = ''; e.target.amount.value = ''; status('Added.');
 }));
-$('#cf').addEventListener('submit', guard(async e => {
-  const r = await api('/api/import', {method: 'POST', body: new FormData(e.target)});
-  status(`Imported ${r.imported} rows` + (r.errors.length ? `; skipped: ${r.errors.join('; ')}` : '.'), r.errors.length > 0);
-}));
 $('#bf').addEventListener('submit', guard(async e => api('/api/budgets', json('PUT', Object.fromEntries(new FormData(e.target))))));
 $('#tx').addEventListener('change', guard(async e => { if (e.target.dataset.id) await api('/api/transactions/' + e.target.dataset.id, json('PATCH', {category: e.target.value})); }));
 $('#tx').addEventListener('click', guard(async e => { const id = e.target.dataset.del; if (id) await api('/api/transactions/' + id, {method: 'DELETE'}); }));

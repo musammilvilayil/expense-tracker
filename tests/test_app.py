@@ -42,9 +42,10 @@ def test_anomaly_detection():
     assert [a["id"] for a in an] == [99]
 
 
-def test_csv_parsing_and_dedupe():
+def test_csv_parsing_keeps_repeated_lines_and_reports_errors():
+    # identical lines in one file can be genuine purchases, so they are kept; overlap with saved data is ml/dedupe.py
     rows, errs = parse_csv("date,description,amount\n2026-01-01,Salary,5000\n2026-01-02,Uber,-12\n2026-01-02,Uber,-12\nbad,x,1\n")
-    assert [r["type"] for r in rows] == ["income", "expense"] and len(errs) == 1
+    assert [r["type"] for r in rows] == ["income", "expense", "expense"] and len(errs) == 1
 
 
 @pytest.fixture
@@ -362,3 +363,146 @@ def test_disabled_account_is_locked_out(tmp_path):
         get_db().execute("UPDATE users SET is_active=0"); get_db().commit()
     assert c.get("/api/transactions").status_code == 401
     assert c.post("/api/login", json={"username": "kevin", "password": "password123"}).status_code == 403
+
+
+# ---------- statement import & duplicate detection ----------
+import io as _io
+import sys as _sys
+import os as _os
+_sys.path.insert(0, _os.path.dirname(__file__))
+import pdf_factory as pf
+from app.ml import dedupe as dd, statement as st
+
+
+def upload(c, data, name="statement.pdf", password=None):
+    form = {"file": (_io.BytesIO(data), name)}
+    if password:
+        form["password"] = password
+    return c.post("/api/import/preview", data=form, content_type="multipart/form-data")
+
+
+def confirm_all(c, prev, only_new=True):
+    rows = [{k: r[k] for k in ("date", "description", "amount", "type")} for r in prev["rows"] if not (only_new and r["duplicate"])]
+    return c.post("/api/import/confirm", json={"rows": rows, "filename": prev["filename"], "file_hash": prev["file_hash"], "kind": prev["kind"]})
+
+
+def months(start_month, n, per_month=3):
+    """Deterministic fake transactions for n consecutive months starting at start_month (1-12, year 2026)."""
+    out = []
+    for i in range(n):
+        m = start_month + i
+        out += [(date(2026, m, 2), f"UPI/SWIGGY/{m}", 400.0 + m, None), (date(2026, m, 3), "SALARY ACME CORP", None, 52000.0),
+                (date(2026, m, 9), "NEFT-ELECTRICITY BILL", 1800.0 + m, None)][:per_month]
+    return out
+
+
+@pytest.mark.parametrize("layout,kw", [("columns", {}), ("columns", {"newest_first": True}), ("drcr", {}), ("signed", {}),
+                                       ("columns_us", {}), ("columns", {"wrap": True}), ("columns", {"per_page": 3})])
+def test_pdf_layouts_parse_correctly(layout, kw):
+    rows, _ = st.parse_pages(st.extract_pages(pf.build(pf.SAMPLE, layout=layout, **kw)))
+    exp = sorted((d.isoformat(), round(db or cr, 2), "expense" if db else "income") for d, _, db, cr in pf.SAMPLE)
+    assert sorted((r["date"], r["amount"], r["type"]) for r in rows) == exp
+    assert all(not r["description"].endswith(tuple("0123456789")) or "/" in r["description"] or " " in r["description"] for r in rows)
+
+
+def test_password_protected_pdf():
+    data = pf.build(pf.SAMPLE, password="s3cret!")
+    with pytest.raises(st.StatementError) as e:
+        st.extract_pages(data)
+    assert e.value.code == "password_required"
+    with pytest.raises(st.StatementError) as e:
+        st.extract_pages(data, "wrong")
+    assert e.value.code == "wrong_password"
+    rows, _ = st.parse_pages(st.extract_pages(data, "s3cret!"))
+    assert len(rows) == len(pf.SAMPLE)
+
+
+def test_not_a_statement_and_scanned_pdf():
+    from reportlab.pdfgen import canvas as cv
+    buf = _io.BytesIO(); c = cv.Canvas(buf); c.showPage(); c.save()          # blank page, like a scanned image
+    with pytest.raises(st.StatementError) as e:
+        st.extract_pages(buf.getvalue())
+    assert e.value.code == "scanned"
+    buf = _io.BytesIO(); c = cv.Canvas(buf); c.drawString(50, 800, "Hello world, no money here"); c.showPage(); c.save()
+    with pytest.raises(st.StatementError) as e:
+        st.parse_pages(st.extract_pages(buf.getvalue()))
+    assert e.value.code == "no_transactions"
+    with pytest.raises(st.StatementError) as e:
+        st.extract_pages(b"%PDF-1.4 garbage")
+    assert e.value.code == "invalid"
+
+
+def test_dedupe_unit_overlap_and_same_day_repeats():
+    existing = [{"id": 1, "date": "2026-01-05", "description": "Swiggy order", "amount": 100.0, "type": "expense"}]
+    inc = [{"date": "2026-01-05", "description": "UPI/SWIGGY/99887766", "amount": 100.0, "type": "expense"},   # same txn, bank wording
+           {"date": "2026-01-05", "description": "UPI/SWIGGY/99887767", "amount": 100.0, "type": "expense"},   # genuine second purchase
+           {"date": "2026-01-05", "description": "Swiggy order", "amount": 100.0, "type": "income"},            # other type -> new
+           {"date": "2026-01-06", "description": "Swiggy order", "amount": 100.0, "type": "expense"}]           # other date -> new
+    got = dd.find_duplicates(inc, existing)
+    assert [g is not None for g in got] == [True, False, False, False]
+
+
+def test_upload_three_months_then_six_adds_only_new_months(tmp_path):
+    c = mk(tmp_path).test_client(); reg(c, "lena")
+    first = upload(c, pf.build(months(1, 3))).get_json()
+    assert first["counts"] == {"total": 9, "new": 9, "duplicate": 0}
+    assert confirm_all(c, first).get_json()["imported"] == 9
+    pdf6 = pf.build(months(1, 6))
+    six = upload(c, pdf6).get_json()                              # includes the first 3 months again
+    assert six["counts"] == {"total": 18, "new": 9, "duplicate": 9} and six["already_imported"] is None
+    assert {r["date"][:7] for r in six["rows"] if not r["duplicate"]} == {"2026-04", "2026-05", "2026-06"}
+    assert confirm_all(c, six).get_json()["imported"] == 9
+    assert len(c.get("/api/transactions").get_json()) == 18      # exactly 6 months, no repeats
+    again = upload(c, pdf6).get_json()                           # the very same file uploaded again
+    assert again["counts"]["new"] == 0 and again["already_imported"] is not None
+    # even if the client ignores the preview and posts everything, nothing is added twice
+    r = confirm_all(c, again, only_new=False).get_json()
+    assert r["imported"] == 0 and r["skipped_duplicates"] == 18
+    assert len(c.get("/api/transactions").get_json()) == 18
+
+
+def test_duplicates_against_manual_and_csv_entries(tmp_path):
+    c = mk(tmp_path).test_client(); reg(c, "mike")
+    c.post("/api/transactions", json={"date": "2026-01-02", "description": "Swiggy", "amount": 450, "type": "expense"})
+    csv = b"date,description,amount\n2026-01-03,Salary,52000\n"
+    assert c.post("/api/import/preview", data={"file": (_io.BytesIO(csv), "a.csv")}, content_type="multipart/form-data").status_code == 200
+    prev = upload(c, pf.build(pf.SAMPLE)).get_json()
+    dup = [r for r in prev["rows"] if r["duplicate"]]
+    assert [r["amount"] for r in dup] == [450.0] and dup[0]["matched"] == "Swiggy"      # manual entry recognised
+
+
+def test_same_day_identical_purchases_both_imported(tmp_path):
+    c = mk(tmp_path).test_client(); reg(c, "nina")
+    twin = [(date(2026, 2, 1), "POS COFFEE SHOP", 3.50, None), (date(2026, 2, 1), "POS COFFEE SHOP", 3.50, None)]
+    prev = upload(c, pf.build(twin)).get_json()
+    assert prev["counts"]["new"] == 2
+    confirm_all(c, prev)
+    assert len(c.get("/api/transactions").get_json()) == 2
+    assert upload(c, pf.build(twin)).get_json()["counts"] == {"total": 2, "new": 0, "duplicate": 2}
+
+
+def test_import_endpoint_password_flow_and_errors(tmp_path):
+    c = mk(tmp_path).test_client(); reg(c, "omar")
+    data = pf.build(pf.SAMPLE, password="pw12345")
+    r = upload(c, data)
+    assert r.status_code == 422 and r.get_json()["code"] == "password_required"
+    assert upload(c, data, password="bad").get_json()["code"] == "wrong_password"
+    ok = upload(c, data, password="pw12345")
+    assert ok.status_code == 200 and ok.get_json()["counts"]["total"] == len(pf.SAMPLE)
+    assert upload(c, b"hello", name="notes.docx").get_json()["code"] == "unsupported"
+    assert c.post("/api/import/preview", data={}, content_type="multipart/form-data").status_code == 400
+    assert c.post("/api/import/confirm", json={"rows": [{"date": "bad", "description": "x", "amount": 1, "type": "expense"}]}).status_code == 422
+
+
+def test_import_history_undo_and_isolation(tmp_path):
+    app = mk(tmp_path)
+    c = app.test_client(); reg(c, "paula")
+    prev = upload(c, pf.build(pf.SAMPLE)).get_json()
+    cid = confirm_all(c, prev).get_json()["import_id"]
+    assert c.get("/api/imports").get_json()[0]["rows_new"] == len(pf.SAMPLE)
+    cats = {t["description"]: t["category"] for t in c.get("/api/transactions").get_json()}
+    assert cats["UPI/SWIGGY/9876543210"] == "Food"                # imported rows are auto-categorised
+    other = app.test_client(); reg(other, "quinn")
+    assert other.delete(f"/api/imports/{cid}").status_code == 404
+    assert c.delete(f"/api/imports/{cid}").get_json()["removed"] == len(pf.SAMPLE)
+    assert c.get("/api/transactions").get_json() == [] and c.get("/api/imports").get_json() == []

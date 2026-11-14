@@ -12,10 +12,20 @@ def clean_description(text: str) -> str:
     return text[:120]
 
 
+# Words banks add to narrations that say nothing about the merchant.
+BANK_NOISE = {
+    "upi", "neft", "imps", "rtgs", "pos", "ach", "ecs", "nach", "atm", "dr", "cr", "debit", "credit",
+    "payment", "pay", "paid", "to", "from", "by", "via", "txn", "transaction", "transfer", "trf", "ref",
+    "no", "bank", "card", "ltd", "pvt", "limited", "india", "the", "and", "of", "for", "online", "purchase",
+}
+
+
 def normalize_merchant(text: str) -> str:
-    """Key used to group repeated charges: lowercase, no digits/punctuation."""
-    text = re.sub(r"[^a-z\s]", " ", (text or "").lower())
-    return re.sub(r"\s+", " ", text).strip()
+    """Key used to group repeated charges: lowercase, no digits/punctuation/bank noise words."""
+    cleaned = re.sub(r"[^a-z\s]", " ", (text or "").lower())
+    words = cleaned.split()
+    kept = [w for w in words if w not in BANK_NOISE]
+    return " ".join(kept or words)
 
 
 def parse_date(value: str) -> str:
@@ -32,10 +42,11 @@ def parse_csv(content: str):
     """Parse CSV with columns date, description, amount[, type].
 
     Negative amounts are treated as expenses when no type column is given.
-    Returns (rows, errors); duplicate rows are dropped.
+    Returns (rows, errors). Repeated identical rows are kept (they can be real purchases);
+    duplicates against existing data are detected separately in ml/dedupe.py.
     """
     reader = csv.DictReader(io.StringIO(content))
-    rows, errors, seen = [], [], set()
+    rows, errors = [], []
     for i, raw in enumerate(reader, start=2):
         rec = {(k or "").strip().lower(): (v or "").strip() for k, v in raw.items()}
         try:
@@ -55,10 +66,6 @@ def parse_csv(content: str):
         except ValueError as e:
             errors.append(f"line {i}: {e}")
             continue
-        key = (date, desc.lower(), amount, ttype)
-        if key in seen:
-            continue
-        seen.add(key)
         rows.append({"date": date, "description": desc, "amount": amount,
                      "type": ttype, "category": rec.get("category") or None})
     return rows, errors
