@@ -149,3 +149,75 @@ def test_404_pages(tmp_path):
     assert r.status_code == 404 and b"wandered off" in r.data
     assert c.get("/api/nope").get_json() == {"error": "not found"}
     assert b"site.js" in c.get("/").data
+
+
+# ---------- forecasting ----------
+from app.ml import forecast as fc
+
+
+def _spend(month, amount, cat="Food", d=10):
+    return tx(f"{month}-{d:02d}", "Spend", amount, cat=cat)
+
+
+def test_forecast_follows_linear_growth():
+    p = fc.predict([100, 120, 140, 160, 180, 200])
+    assert 190 <= p["pred"] <= 215 and p["low"] <= p["pred"] <= p["high"]
+
+
+def test_forecast_flat_series_has_tight_range():
+    p = fc.predict([500, 500, 500, 500, 500])
+    assert p["pred"] == 500 and p["high"] - p["low"] <= 70  # 5% noise floor
+
+
+def test_forecast_low_data_and_empty():
+    assert fc.predict([])["pred"] == 0
+    one = fc.predict([300])
+    assert one["pred"] == 300 and one["high"] > one["low"]
+    assert fc.confidence(2) == "low" and fc.confidence(4) == "medium" and fc.confidence(8) == "high"
+
+
+def test_forecast_never_negative_and_horizon_widens():
+    h = fc.predict_horizon([10, 200, 5, 180, 20, 90], 3)
+    assert all(x["low"] >= 0 for x in h)
+    assert (h[2]["high"] - h[2]["low"]) >= (h[0]["high"] - h[0]["low"])
+
+
+def test_build_fills_gap_months_and_projects_current_month():
+    today = date(2026, 11, 15)
+    txs = [_spend("2026-08", 300), _spend("2026-10", 500), _spend("2026-11", 250, d=5),
+           tx("2026-08-01", "Salary", 2000, "income", "Income"), tx("2026-10-01", "Salary", 2000, "income", "Income")]
+    r = fc.build(txs, {"Food": 400}, [], [], today=today)
+    assert r["history"]["months"] == ["2026-08", "2026-09", "2026-10"]
+    assert r["history"]["expense"] == [300, 0, 500]          # empty September counted as 0
+    assert r["current_month"]["spent_so_far"] == 250 and r["current_month"]["days_left"] == 15
+    assert r["forecast"]["months"] == ["2026-12", "2027-01", "2027-02"]
+    assert r["categories"][0]["category"] == "Food" and r["categories"][0]["budget_risk"] in ("over", "warning", "ok")
+    assert r["insights"]
+
+
+def test_build_with_only_current_month_data():
+    today = date(2026, 11, 10)
+    r = fc.build([_spend("2026-11", 100, d=3)], {}, [], [], today=today)
+    assert r["confidence"] == "low" and r["forecast"]["expense"]
+    assert fc.build([], {}, [], [], today=today)["insights"] == ["Add some transactions to unlock forecasts."]
+
+
+def test_commitments_include_autopay_and_dedupe_subscriptions():
+    today = date(2026, 11, 15)
+    rules = [{"description": "Rent", "amount": 800, "type": "expense", "frequency": "monthly", "anchor_day": 20, "next_date": "2026-11-20", "active": 1},
+             {"description": "Old", "amount": 5, "type": "expense", "frequency": "monthly", "anchor_day": 1, "next_date": "2026-11-20", "active": 0}]
+    subs = [{"name": "Rent", "amount": 800, "next_renewal": "2026-11-20"}, {"name": "Netflix", "amount": 199, "next_renewal": "2026-11-25"}]
+    items = fc.upcoming_commitments(rules, subs, today)
+    assert [(i["name"], i["source"]) for i in items] == [("Rent", "autopay"), ("Netflix", "subscription")]
+
+
+def test_forecast_endpoint(client):
+    assert client.application.test_client().get("/api/forecast").status_code == 401
+    for m, amt in [(8, 300), (9, 340), (10, 380)]:
+        y = date.today().year if date.today().month > 10 else date.today().year - 1
+        client.post("/api/transactions", json={"date": f"{y}-{m:02d}-10", "description": "Swiggy order", "amount": amt})
+    r = client.get("/api/forecast?horizon=2")
+    assert r.status_code == 200
+    body = r.get_json()
+    assert len(body["forecast"]["months"]) == 2 and "insights" in body and "categories" in body
+    assert client.get("/api/forecast?horizon=abc").status_code == 400

@@ -213,3 +213,14 @@ body.app{background:var(--bg)}
 .spin{animation:spin 14s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 .sa.active .draw,.draw{animation:ring 1.8s var(--ease) both}@keyframes ring{from{stroke-dashoffset:628}}
 .timeline:after{z-index:0}.timeline li:before{z-index:2}
+
+/* Forecast */
+.fhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.fsub{margin:2px 0 14px;color:var(--mut)}
+.conf{font:500 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;padding:5px 11px;border-radius:99px;background:var(--soft2);color:var(--brand)}
+.conf.low{background:#fff4e8;color:var(--warn)}
+.mini{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.mini p{font-size:26px;font-weight:700;letter-spacing:-.03em;margin:4px 0 0;color:var(--ink)}
+.mini small{color:var(--mut);display:block;min-height:1.3em}
+#f-tips{margin:14px 0 0}
+.risk-over{color:var(--bad);font-weight:600}.risk-warning{color:var(--warn);font-weight:600}

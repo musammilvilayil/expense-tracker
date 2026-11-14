@@ -58,7 +58,7 @@ Implementation note: add a `role` column to `users` (`user`, `admin`), a `househ
 - Categorisation: TF-IDF char n-grams + logistic regression, with a confidence threshold [Built]. Improvement: show confidence and ask the user to confirm low-confidence items [Planned].
 - Subscription detection: group by merchant, check interval and amount consistency [Built]. Improvement: detect free-trial-to-paid conversion and price hikes [Planned].
 - Anomaly detection: robust median/MAD z-score per category [Built]. Improvement: Isolation Forest across amount, time and merchant [Planned].
-- Forecasting: next-month spend per category via moving average / regression [Future: LSTM or Prophet].
+- Forecasting: next-month spend, income and savings (total and per category) via backtested average, weighted-average and damped-trend models, with an 80% range and confidence level [Built]. Seasonality and LSTM/Prophet models [Future].
 - Natural-language assistant ("how much did I spend on food last month?") [Future].
 
 **Autopay / recurring payments**: rules auto-record transactions on due dates, with pause and delete [Built]; real bank mandates (UPI AutoPay / e-NACH) [Future].

@@ -20,12 +20,14 @@ const tween = (el, to, fmt = money) => {
     el.textContent = fmt(from + (to - from) * e); if (p < 1) requestAnimationFrame(step); };
   requestAnimationFrame(step);
 };
+const FC_COLORS = {hist: '#2f6b0a', fc: '#e0803f', band: 'rgba(224,128,63,.16)'};
 const PAL = ['#2f6b0a', '#b8f06f', '#5bb8d4', '#e0803f', '#f3dc6b', '#a99bf0', '#0d1a08', '#d6e4c4'];
 $('#month').value = new Date().toISOString().slice(0, 7);
 
 function chart(id, cfg) { charts[id]?.destroy(); if (window.Chart) charts[id] = new Chart($(id), cfg); }
 
 async function refresh() {
+  loadForecast().catch(e => { if (e.message !== 'auth') console.error(e); });
   const month = $('#month').value;
   const [ins, txs, ap] = await Promise.all([api('/api/insights?month=' + month), api('/api/transactions'), api('/api/autopay')]);
   $('#ap tbody').innerHTML = ap.length ? ap.map(a => `<tr><td>${esc(a.description)}${a.active ? '' : ' (paused)'}</td><td>${a.type === 'income' ? '+' : '-'}${money(a.amount)}</td><td>${a.frequency}</td><td>${a.next_date}</td><td><button class="secondary" data-pause="${a.id}" data-active="${a.active ? 0 : 1}">${a.active ? 'Pause' : 'Resume'}</button> <button class="secondary" data-apdel="${a.id}" aria-label="Delete autopay">×</button></td></tr>`).join('') : '<tr><td colspan="5">No autopay rules.</td></tr>';
@@ -61,6 +63,39 @@ async function refresh() {
     <td class="${t.type === 'income' ? 'pos' : ''}">${t.type === 'income' ? '+' : '-'}${money(t.amount)}</td>
     <td>${t.type === 'expense' ? `<select data-id="${t.id}" aria-label="Category">${CATS.map(c => `<option ${c === t.category ? 'selected' : ''}>${c}</option>`).join('')}</select>` : 'Income'}</td>
     <td><button class="secondary" data-del="${t.id}" aria-label="Delete transaction">×</button></td></tr>`).join('');
+}
+
+
+async function loadForecast() {
+  const f = await api('/api/forecast?horizon=3');
+  const fe = f.forecast.expense, fs = f.forecast.savings;
+  const conf = $('#f-conf'); conf.textContent = f.confidence + ' confidence · ' + f.months_of_data + ' full month' + (f.months_of_data === 1 ? '' : 's');
+  conf.className = 'conf ' + f.confidence;
+  const range = x => x ? `likely ${money(x.low)} to ${money(x.high)}` : '';
+  $('#f-next').textContent = fe.length ? money(fe[0].pred) : '–'; $('#f-next-r').textContent = range(fe[0]);
+  $('#f-sav').textContent = fs.length ? money(fs[0].pred) : '–'; $('#f-sav').className = fs.length && fs[0].pred < 0 ? 'neg' : '';
+  $('#f-sav-r').textContent = fs.length ? range(fs[0]) : 'needs income data';
+  const cm = f.current_month;
+  $('#f-proj').textContent = money(cm.projected); $('#f-proj-r').textContent = `${money(cm.spent_so_far)} spent, ${cm.days_left} days left`;
+  $('#f-com').textContent = money(f.commitments_total); $('#f-com-r').textContent = f.commitments.length + ' scheduled payment' + (f.commitments.length === 1 ? '' : 's');
+  $('#f-tips').innerHTML = f.insights.map(t => `<li>${esc(t)}</li>`).join('');
+  $('#f-cats tbody').innerHTML = f.categories.length ? f.categories.map(c => `<tr><td>${esc(c.category)}</td>
+    <td class="${c.budget_risk ? 'risk-' + c.budget_risk : ''}">${money(c.predicted)}</td><td>${money(c.low)} – ${money(c.high)}</td>
+    <td>${c.change_pct === null ? '–' : (c.change_pct > 0 ? '+' : '') + c.change_pct + '%'}</td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty">Add transactions across a few months to see category forecasts.</td></tr>';
+
+  const hm = f.history.months, fm = f.forecast.months, labels = [...hm, cm.month, ...fm], pad = Array(hm.length + 1).fill(null);
+  const last = hm.length - 1;
+  const fcLine = [...pad.map((_, i) => i === last ? f.history.expense[last] : i === hm.length ? cm.projected : null), ...fe.map(x => x.pred)];
+  charts['#c-fc']?.destroy();
+  if (window.Chart && labels.length) charts['#c-fc'] = new Chart($('#c-fc'), {type: 'line', options: {maintainAspectRatio: false,
+      plugins: {legend: {labels: {filter: i => !i.text.startsWith('_')}}}, interaction: {mode: 'index', intersect: false}},
+    data: {labels, datasets: [
+      {label: '_high', data: [...pad, ...fe.map(x => x.high)], borderWidth: 0, pointRadius: 0, fill: '+1', backgroundColor: FC_COLORS.band},
+      {label: '_low', data: [...pad, ...fe.map(x => x.low)], borderWidth: 0, pointRadius: 0, fill: false},
+      {label: 'Spending', data: [...f.history.expense, null, ...fm.map(() => null)], borderColor: FC_COLORS.hist, backgroundColor: FC_COLORS.hist, tension: .3},
+      {label: 'Forecast', data: fcLine, borderColor: FC_COLORS.fc, backgroundColor: FC_COLORS.fc, borderDash: [6, 5], tension: .3},
+    ]}});
 }
 
 const guard = fn => async e => { e.preventDefault(); try { await fn(e); await refresh(); } catch (x) { if (x.message !== 'auth') status(x.message, true); } };

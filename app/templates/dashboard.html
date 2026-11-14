@@ -16,6 +16,20 @@
     <div class="card"><h3>Savings</h3><p id="k-sav">–</p></div>
     <div class="card"><h3>Savings rate</h3><p id="k-rate">–</p></div>
   </section>
+  <section class="card" id="forecast">
+    <div class="fhead"><div><h2>Forecast</h2><p class="fsub" id="f-sub">Predicted from your spending history.</p></div><span class="conf" id="f-conf"></span></div>
+    <div class="grid kpis" id="f-kpis">
+      <div class="mini"><h3>Next month spend</h3><p id="f-next">–</p><small id="f-next-r"></small></div>
+      <div class="mini"><h3>Predicted savings</h3><p id="f-sav">–</p><small id="f-sav-r"></small></div>
+      <div class="mini"><h3>This month on pace for</h3><p id="f-proj">–</p><small id="f-proj-r"></small></div>
+      <div class="mini"><h3>Committed, next 30 days</h3><p id="f-com">–</p><small id="f-com-r"></small></div>
+    </div>
+    <div class="grid two" style="margin-top:16px">
+      <div><div class="chartbox"><canvas id="c-fc"></canvas></div></div>
+      <div><table id="f-cats"><thead><tr><th>Category</th><th>Next month</th><th>Range</th><th>vs last</th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <ul id="f-tips"></ul>
+  </section>
   <section class="grid two">
     <div class="card"><h2>Spending by category</h2><div class="chartbox"><canvas id="c-cat"></canvas></div></div>
     <div class="card"><h2>Monthly trend</h2><div class="chartbox"><canvas id="c-trend"></canvas></div></div>

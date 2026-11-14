@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, sessio
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .db import get_db
-from .ml import analysis, categorizer, recurring, subscriptions
+from .ml import analysis, categorizer, forecast, recurring, subscriptions
 from .ml.preprocess import clean_description, parse_csv, parse_date
 
 bp = Blueprint("main", __name__)
@@ -118,6 +118,7 @@ FAQS = [
     ("Does autopay really pay my bills?", "No. Autopay rules only record transactions in the tracker on their due dates. No money moves."),
     ("What CSV format should I use?", "Columns date, description and amount, with an optional type column (income or expense). Without type, negative amounts are expenses."),
     ("What counts as unusual spending?", "An expense far above the typical amount for its category. At least 5 expenses in that category are needed first."),
+    ("How does the forecast work?", "It uses your completed monthly totals. Three simple models (recent average, weighted average and a damped trend) are tested on your own history, the most accurate one is used, and its past error gives the likely range. More months of data means a better forecast."),
     ("Is this financial advice?", "No. Tips are automated guidance based on your own numbers."),
     ("Can I delete my data?", "You can delete transactions and autopay rules. Account deletion and data export are planned."),
 ]
@@ -374,3 +375,20 @@ def delete_autopay(aid):
     cur = db.execute("DELETE FROM autopay WHERE id=? AND user_id=?", (aid, session["user_id"]))
     db.commit()
     return jsonify(ok=True) if cur.rowcount else err("not found", 404)
+
+
+# ---------- forecast ----------
+@bp.get("/api/forecast")
+@login_required
+def get_forecast():
+    uid = session["user_id"]
+    run_autopay(uid)
+    try:
+        horizon = min(max(int(request.args.get("horizon", 3)), 1), 6)
+    except ValueError:
+        return err("horizon must be a number")
+    txs = user_transactions(uid)
+    rules = [dict(r) for r in get_db().execute(
+        "SELECT description,amount,type,frequency,anchor_day,next_date,active FROM autopay WHERE user_id=?",
+        (uid,)).fetchall()]
+    return jsonify(forecast.build(txs, user_budgets(uid), rules, subscriptions.detect(txs), horizon=horizon))
