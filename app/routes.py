@@ -48,7 +48,11 @@ FAQS = [
     ("What counts as unusual spending?", "An expense far above the typical amount for its category. At least 5 expenses in that category are needed first."),
     ("How does the forecast work?", "It uses your completed monthly totals. Three simple models (recent average, weighted average and a damped trend) are tested on your own history, the most accurate one is used, and its past error gives the likely range. More months of data means a better forecast."),
     ("Is this financial advice?", "No. Tips are automated guidance based on your own numbers."),
-    ("Can I delete my data?", "You can delete transactions and autopay rules. Account deletion and data export are planned."),
+    ("Can I delete my data?", "Yes. In Settings you can download all your data and permanently delete your account. You can also undo any statement import."),
+    ("Can I upload a password-protected PDF statement?", "Yes. If a PDF is protected, the import screen asks for its password (often your date of birth or customer ID, as set by your bank). The password is used once to read the file and is never stored."),
+    ("What if I upload the same months again, or a longer statement that includes months I already added?", "Rows already in your account are detected and skipped, even if you uploaded them from a different file or typed them in by hand. Only new rows are added, and the preview shows what will happen before anything is saved."),
+    ("Why was my PDF not read correctly?", "Bank layouts vary, so the reader is heuristic and works only on text PDFs (not scanned images). Always check the preview, fix the Type and Category columns if needed, or use the CSV option instead."),
+    ("How do reminders work?", "Upcoming autopay payments, subscription renewals, budget limits, goal deadlines and unusual charges appear under the bell. If you added an email and left reminder emails on, a daily digest can also be sent by the site owner running the send-reminders command."),
 ]
 
 

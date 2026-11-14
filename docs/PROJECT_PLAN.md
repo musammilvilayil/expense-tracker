@@ -29,7 +29,7 @@ This project is an **intelligent financial assistant** that turns raw transactio
 | **Registered User** | Individual managing own money | Full CRUD on own transactions; CSV import; correct categories; set budgets; view dashboard, subscriptions, anomalies, recommendations; export reports; delete own account and data. | [Built], except export and account deletion [Planned] |
 | **Family / Shared member** | Spouse, parent, flatmate | Join a shared household; add and view shared transactions; shared budgets. Cannot see another member's private transactions. | [Planned] |
 | **Advisor (read-only)** | Financial advisor or mentor the user invites | Time-limited read-only access to summaries and reports the user chooses to share. Cannot edit or see raw descriptions unless granted. | [Future] |
-| **Administrator** | Project maintainer | Manage user accounts (disable/reset), view system health and anonymised usage stats, manage the category list and ML seed data, retrain/roll back the global model. **No access to users' transaction details.** | [Planned] |
+| **Administrator** | Project maintainer | Manage user accounts (disable/enable, roles, send reset email), read contact messages, view audit log and model quality. **No access to users' transaction details.** | [Built] (`/admin`) |
 | **System (automated actors)** | Scheduler, ML service, notifier | Nightly subscription re-detection, renewal reminders, anomaly scans, model retraining. | [Planned] |
 
 ### Role-permission matrix
@@ -50,9 +50,9 @@ Implementation note: add a `role` column to `users` (`user`, `admin`), a `househ
 
 ## 3. Functional requirements
 
-**Account and security**: registration, login, logout, password hashing [Built]; password reset, optional 2FA, session timeout [Planned].
+**Account and security**: registration, login, logout, password hashing [Built]; email, password reset, login rate limiting, CSRF protection, data export and account deletion [Built]; optional 2FA [Planned].
 
-**Transactions**: add, delete, recategorise [Built]; edit amount/date, notes, tags, split transactions, multi-currency [Planned].
+**Transactions**: add, delete, recategorise, PDF (incl. password-protected) and CSV statement import with preview, duplicate detection and undo [Built]; edit amount/date, notes, tags, split transactions, multi-currency [Planned].
 
 **AI/ML**
 - Categorisation: TF-IDF char n-grams + logistic regression, with a confidence threshold [Built]. Improvement: show confidence and ask the user to confirm low-confidence items [Planned].
@@ -63,11 +63,11 @@ Implementation note: add a `role` column to `users` (`user`, `admin`), a `househ
 
 **Autopay / recurring payments**: rules auto-record transactions on due dates, with pause and delete [Built]; real bank mandates (UPI AutoPay / e-NACH) [Future].
 
-**Budgets and goals**: per-category monthly budgets with 80%/100% alerts [Built]; savings goals with progress tracking [Planned]; smart budget suggestions from history [Future].
+**Budgets and goals**: per-category monthly budgets with 80%/100% alerts [Built]; savings goals with contributions, projection and status [Built]; smart budget suggestions from history [Future].
 
-**Reports**: monthly/yearly summaries and charts [Built]; PDF/CSV export [Planned].
+**Reports**: monthly/yearly summaries and charts [Built]; PDF/CSV export [Built].
 
-**Notifications**: dashboard alerts [Built]; e-mail/push reminders 7/3/1 days before renewal [Planned].
+**Notifications**: in-app reminders and optional email digest (`manage.py send-reminders`) [Built]; push notifications [Future].
 
 ## 4. Non-functional requirements
 

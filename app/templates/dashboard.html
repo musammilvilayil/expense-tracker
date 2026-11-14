@@ -9,7 +9,11 @@
 <body class="app">
 <div class="progress" aria-hidden="true"><i></i></div>
 <header class="apptop"><a class="brand" href="/"><i></i>AI Finance Tracker</a>
-  <div><label for="month" class="eyebrow">Month</label><input type="month" id="month"> <span>{{ username }}</span> <button id="logout" class="secondary">Sign out</button></div></header>
+  <div><label for="month" class="eyebrow">Month</label><input type="month" id="month">
+    <div class="bellwrap"><button class="secondary bell" id="bell" aria-haspopup="true" aria-expanded="false" aria-label="Notifications">&#128276; <span id="bell-n" hidden>0</span></button>
+      <div class="bellpanel" id="bell-panel" hidden role="region" aria-label="Notifications"><div class="bellhead"><b>Reminders</b><button class="secondary" id="bell-read" type="button">Mark all read</button></div><ul id="bell-list"></ul></div></div>
+    <a href="/settings">Settings</a>{% if is_admin %}<a href="/admin">Admin</a>{% endif %}
+    <span>{{ username }}</span> <button id="logout" class="secondary">Sign out</button></div></header>
 <main class="appmain">
   <section id="alerts" aria-live="polite"></section>
   <section class="grid kpis">
@@ -56,6 +60,18 @@
       <select name="frequency"><option>monthly</option><option>weekly</option><option>quarterly</option><option>yearly</option></select>
       <label>First date <input name="start_date" type="date" value="{{ today }}" required></label>
       <button>Add autopay</button></form></section>
+  <section class="card" id="goals"><div class="fhead"><div><h2>Savings goals</h2><p class="fsub">Track what you are saving for. Projections use your recent contributions, or your forecast savings if you have none.</p></div></div>
+    <div id="goal-list"></div>
+    <form id="goal-form" class="inline"><input name="name" placeholder="Goal, e.g. New laptop" required maxlength="80">
+      <input name="target_amount" type="number" min="1" step="0.01" placeholder="Target amount" required>
+      <label class="eyebrow">By <input name="target_date" type="date"></label>
+      <input name="initial" type="number" min="0" step="0.01" placeholder="Already saved (optional)">
+      <button>Add goal</button></form>
+    <p id="goal-msg" role="status"></p></section>
+  <section class="card" id="reports"><h2>Download reports</h2>
+    <p class="hint">Reports include your summary, category breakdown, budgets, subscriptions and transactions.</p>
+    <div class="inline"><a class="btn secondary" id="r-csv-m" href="#">Month CSV</a><a class="btn secondary" id="r-pdf-m" href="#">Month PDF</a>
+      <a class="btn secondary" id="r-csv-y" href="#">Year CSV</a><a class="btn secondary" id="r-pdf-y" href="#">Year PDF</a></div></section>
   <section class="card" id="import"><h2>Import bank statement</h2>
     <p class="hint">Upload a PDF statement or a CSV (<code>date, description, amount</code>). Rows already in your account are detected and skipped, so overlapping uploads (for example 3 months, then 6 months) are safe.</p>
     <form id="imp-form" class="inline"><input type="file" name="file" accept=".pdf,.csv,.txt" required aria-label="Statement file">
@@ -64,7 +80,7 @@
     <p id="imp-msg" role="status"></p>
     <div id="imp-preview" hidden>
       <p id="imp-summary"></p><ul id="imp-warn" class="hint"></ul>
-      <div class="tablewrap"><table id="imp-table"><thead><tr><th><input type="checkbox" id="imp-all" aria-label="Select all" checked></th><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+      <div class="tablewrap"><table id="imp-table"><thead><tr><th><input type="checkbox" id="imp-all" aria-label="Select all" checked></th><th>Date</th><th>Description</th><th>Amount</th><th>Type</th><th>Category</th><th>Status</th></tr></thead><tbody></tbody></table></div>
       <div class="inline"><button id="imp-go">Import selected</button><button class="secondary" id="imp-cancel" type="button">Cancel</button></div>
     </div>
     <h3 style="margin-top:18px">Import history</h3>
@@ -85,5 +101,6 @@
 <script>const CATS={{ categories|tojson }};</script>
 <script src="/static/app.js"></script>
 <script src="/static/import.js"></script>
+<script src="/static/extras.js"></script>
 <script src="/static/site.js" defer></script>
 </body></html>

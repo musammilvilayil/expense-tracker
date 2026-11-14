@@ -87,8 +87,8 @@ def insert_rows(uid, rows, source="manual", import_id=None):
             cat = "Other"
         db.execute(
             "INSERT INTO transactions(user_id,date,description,amount,type,category,confirmed,source,import_id) "
-            "VALUES(?,?,?,?,?,?,0,?,?)",
-            (uid, r["date"], r["description"], r["amount"], r["type"], cat, source, import_id))
+            "VALUES(?,?,?,?,?,?,?,?,?)",
+            (uid, r["date"], r["description"], r["amount"], r["type"], cat, 1 if r.get("confirmed") else 0, source, import_id))
     db.commit()
 
 

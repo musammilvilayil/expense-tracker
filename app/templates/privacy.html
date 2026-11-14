@@ -7,16 +7,17 @@
 
 <p>This is a student project, not a commercial service. This page describes what the software does today.</p>
 <h2>What is stored</h2>
-<ul><li>Your username and a salted password hash. Your password is never stored in plain text.</li>
-<li>The transactions, budgets and autopay rules you enter or import.</li></ul>
+<ul><li>Your username, an optional email address and a salted password hash. Your password is never stored in plain text.</li>
+<li>The transactions, budgets, autopay rules, savings goals and reminders you create or import.</li>
+<li>For each statement import: the file name, a fingerprint (hash) of the file, and counts. <strong>The uploaded file itself is not saved</strong>, and a PDF password is used once to read the file and is never stored.</li></ul>
 <h2>How it is used</h2>
-<ul><li>Only to show your own dashboard, categorize your expenses and find your subscriptions.</li>
+<ul><li>Only to show your own dashboard, categorize your expenses, find subscriptions, forecast spending and send the reminders you opt in to.</li>
 <li>The ML runs inside the application. Your data is not sent to third-party AI services.</li>
-<li>Each account sees only its own data.</li></ul>
+<li>Each account sees only its own data. Administrators can manage accounts and read support messages, but the admin tools do not show anyone's transactions or other financial data.</li>
+<li>Your email is used only for password reset and reminders. You can turn reminder emails off in Settings.</li></ul>
 <h2>What is not collected</h2>
-<p>No bank credentials, card numbers or contact lists. Importing a CSV is the only way bank data enters the system.</p>
+<p>No bank credentials, card numbers or contact lists. Importing a statement or CSV is the only way bank data enters the system.</p>
 <h2>Your control</h2>
-<p>You can delete any transaction or autopay rule at any time. Account deletion and data export are planned but not yet available.</p>
+<p>In Settings you can download all your data as a JSON file, change your password and permanently delete your account and everything stored about you. You can also delete individual transactions, undo a whole import, and delete autopay rules and goals.</p>
 <p>Because financial data is sensitive, use a unique password, and do not enter real data on a deployment that is not served over HTTPS.</p>
-</div></div>
 {% endblock %}

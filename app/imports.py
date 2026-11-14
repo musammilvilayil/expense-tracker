@@ -6,8 +6,8 @@ from datetime import date, datetime
 from flask import Blueprint, jsonify, request, session
 
 from .db import get_db
-from .helpers import err, insert_rows, login_required
-from .ml import dedupe, statement
+from .helpers import err, insert_rows, login_required, model_for
+from .ml import categorizer, dedupe, statement
 from .ml.preprocess import clean_description, parse_csv
 
 bp = Blueprint("imports", __name__)
@@ -58,11 +58,14 @@ def preview():
     if len(rows) > MAX_ROWS:
         return err(f"too many rows ({len(rows)}). Split the file into smaller periods.", 422, code="too_large")
     matches = dedupe.find_duplicates(rows, _existing(uid, rows))
+    guesses = categorizer.predict_with_confidence(model_for(uid), [r["description"] for r in rows])
     out = []
-    for i, (r, m) in enumerate(zip(rows, matches)):
+    for i, (r, m, (cat, conf)) in enumerate(zip(rows, matches, guesses)):
+        given = r.get("category") if r.get("category") in categorizer.CATEGORIES else None
         out.append({"i": i, "date": r["date"], "description": r["description"], "amount": r["amount"], "type": r["type"],
-                    "confidence": r.get("confidence"), "duplicate": m is not None,
-                    "matched": m["description"] if m else None})
+                    "confidence": r.get("confidence"), "duplicate": m is not None, "matched": m["description"] if m else None,
+                    "category": given or cat, "category_confidence": 1.0 if given else round(conf, 2),
+                    "low_confidence": not given and conf < categorizer.LOW_CONFIDENCE})
     prev = get_db().execute("SELECT id,created_at FROM imports WHERE user_id=? AND file_hash=? ORDER BY id DESC LIMIT 1",
                             (uid, digest)).fetchone()
     dups = sum(1 for r in out if r["duplicate"])
@@ -83,7 +86,9 @@ def _clean_rows(raw):
         desc = clean_description(str(r.get("description", "")))
         if not desc or amount <= 0 or r.get("type") not in ("income", "expense"):
             raise ValueError(f"row {n}: needs a description, positive amount and type income/expense")
-        rows.append({"date": d, "description": desc, "amount": amount, "type": r["type"], "category": r.get("category") or None})
+        cat = r.get("category") if r.get("category") in categorizer.CATEGORIES else None
+        rows.append({"date": d, "description": desc, "amount": amount, "type": r["type"], "category": cat,
+                     "confirmed": bool(cat and r.get("category_edited"))})
     return rows
 
 

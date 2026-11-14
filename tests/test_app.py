@@ -506,3 +506,235 @@ def test_import_history_undo_and_isolation(tmp_path):
     assert other.delete(f"/api/imports/{cid}").status_code == 404
     assert c.delete(f"/api/imports/{cid}").get_json()["removed"] == len(pf.SAMPLE)
     assert c.get("/api/transactions").get_json() == [] and c.get("/api/imports").get_json() == []
+
+
+# ---------- reports ----------
+def test_report_csv_and_pdf(tmp_path):
+    c = mk(tmp_path).test_client(); reg(c, "ravi")
+    c.post("/api/transactions", json={"date": "2026-03-01", "description": "Salary", "amount": 3000, "type": "income"})
+    c.post("/api/transactions", json={"date": "2026-03-02", "description": "=HYPERLINK(\"http://evil\")", "amount": 40})
+    c.post("/api/transactions", json={"date": "2026-04-02", "description": "Swiggy <b>order</b> & more", "amount": 25})
+    r = c.get("/api/report?period=2026-03&format=csv")
+    assert r.status_code == 200 and r.mimetype == "text/csv" and "attachment" in r.headers["Content-Disposition"]
+    text = r.data.decode("utf-8-sig")
+    assert "Salary" in text and "2026-04-02" not in text                  # only the requested month
+    assert "'=HYPERLINK" in text and ",=HYPERLINK" not in text            # formula injection neutralised
+    yr = c.get("/api/report?period=2026&format=csv").data.decode("utf-8-sig")
+    assert "2026-04-02" in yr
+    pdf = c.get("/api/report?period=2026&format=pdf")
+    assert pdf.status_code == 200 and pdf.data[:5] == b"%PDF-"
+    from pypdf import PdfReader
+    body = "".join(p.extract_text() for p in PdfReader(_io.BytesIO(pdf.data)).pages)
+    assert "Finance report: 2026" in body and "Salary" in body and "Swiggy" in body
+    assert c.get("/api/report?period=nope").status_code == 400
+    assert c.get("/api/report?period=2026-03&format=xls").status_code == 400
+    assert mk(tmp_path, "z.sqlite").test_client().get("/api/report").status_code == 401
+
+
+def test_empty_report_pdf(tmp_path):
+    c = mk(tmp_path).test_client(); reg(c, "sara")
+    assert c.get("/api/report?period=2026-05&format=pdf").data[:5] == b"%PDF-"
+
+
+# ---------- goals ----------
+from app.goals import goal_view
+
+
+def _goal(target=1000, tdate=None):
+    return {"id": 1, "name": "Trip", "target_amount": target, "target_date": tdate}
+
+
+def test_goal_view_statuses():
+    today = date(2026, 6, 1)
+    done = goal_view(_goal(100), [{"amount": 100, "date": "2026-05-01"}], None, today)
+    assert done["status"] == "achieved" and done["percent"] == 100
+    nodata = goal_view(_goal(), [{"amount": 100, "date": "2025-01-01"}], None, today)
+    assert nodata["status"] == "no_data" and nodata["remaining"] == 900
+    ontrack = goal_view(_goal(1000, "2027-06-01"), [{"amount": 300, "date": "2026-05-20"}], None, today)   # saves 100/month
+    assert ontrack["status"] == "on_track" and ontrack["rate_source"] == "contributions" and ontrack["projected_date"] < "2027-06-01"
+    behind = goal_view(_goal(1000, "2026-08-01"), [{"amount": 30, "date": "2026-05-20"}], None, today)    # saves 10/month
+    assert behind["status"] == "behind" and behind["required_monthly"] > 300
+    overdue = goal_view(_goal(1000, "2026-01-01"), [], 50, today)
+    assert overdue["status"] == "overdue"
+    by_forecast = goal_view(_goal(500), [], 100, today)
+    assert by_forecast["rate_source"] == "forecast" and by_forecast["status"] == "in_progress"
+    assert goal_view(_goal(500), [{"amount": 200, "date": "2026-05-01"}, {"amount": -50, "date": "2026-05-02"}], None, today)["saved"] == 150
+
+
+def test_goals_api(tmp_path):
+    app = mk(tmp_path); c = app.test_client(); reg(c, "tara")
+    assert c.post("/api/goals", json={"name": "", "target_amount": 100}).status_code == 400
+    assert c.post("/api/goals", json={"name": "Laptop", "target_amount": -5}).status_code == 400
+    gid = c.post("/api/goals", json={"name": "Laptop", "target_amount": 1000, "target_date": "2030-01-01", "initial": 100}).get_json()["id"]
+    assert c.post(f"/api/goals/{gid}/contributions", json={"amount": 150}).status_code == 201
+    assert c.post(f"/api/goals/{gid}/contributions", json={"amount": -900}).status_code == 400      # cannot withdraw more than saved
+    assert c.post(f"/api/goals/{gid}/contributions", json={"amount": 0}).status_code == 400
+    g = c.get("/api/goals").get_json()[0]
+    assert g["saved"] == 250 and g["remaining"] == 750 and g["percent"] == 25.0
+    other = app.test_client(); reg(other, "uma")
+    assert other.get("/api/goals").get_json() == []
+    assert other.post(f"/api/goals/{gid}/contributions", json={"amount": 5}).status_code == 404
+    assert other.delete(f"/api/goals/{gid}").status_code == 404
+    assert c.delete(f"/api/goals/{gid}").status_code == 200 and c.get("/api/goals").get_json() == []
+
+
+# ---------- notifications / reminders ----------
+from app import notifications as nt
+
+
+def test_notifications_generated_once_and_marked_read(tmp_path):
+    app = mk(tmp_path); c = app.test_client(); reg(c, "vera", "password123", "vera@example.com")
+    soon = (date.today() + timedelta(days=3)).isoformat()
+    far = (date.today() + timedelta(days=40)).isoformat()
+    c.post("/api/autopay", json={"description": "Gym", "amount": 60, "frequency": "monthly", "start_date": soon})
+    c.post("/api/autopay", json={"description": "Insurance", "amount": 90, "frequency": "yearly", "start_date": far})
+    month = date.today().strftime("%Y-%m")
+    c.post("/api/transactions", json={"date": f"{month}-01", "description": "Swiggy order", "amount": 90})
+    c.put("/api/budgets", json={"category": "Food", "monthly_limit": 100})
+    c.post("/api/goals", json={"name": "Bike", "target_amount": 500, "target_date": (date.today() + timedelta(days=5)).isoformat()})
+    first = c.get("/api/notifications").get_json()
+    kinds = sorted(i["kind"] for i in first["items"])
+    assert kinds == ["autopay", "budget", "goal"] and first["unread"] == 3
+    assert any("Gym" in i["message"] and "in 3 days" in i["message"] for i in first["items"])
+    assert not any("Insurance" in i["message"] for i in first["items"])           # 40 days away: no reminder yet
+    assert c.get("/api/notifications").get_json()["unread"] == 3                  # idempotent
+    ids = [i["id"] for i in first["items"]][:1]
+    assert c.post("/api/notifications/read", json={"ids": ids}).status_code == 200
+    assert c.get("/api/notifications").get_json()["unread"] == 2
+    assert c.post("/api/notifications/read", json={"ids": ["x"]}).status_code == 400
+    assert c.post("/api/notifications/read", json={}).status_code == 200
+    assert c.get("/api/notifications").get_json()["unread"] == 0
+
+
+def test_reminder_emails_respect_opt_out_and_send_once(tmp_path):
+    app = mk(tmp_path); c = app.test_client()
+    reg(c, "wade", "password123", "wade@example.com")
+    c.post("/api/autopay", json={"description": "Rent", "amount": 800, "frequency": "monthly", "start_date": (date.today() + timedelta(days=2)).isoformat()})
+    c.post("/api/logout")
+    c2 = app.test_client(); reg(c2, "xena", "password123", "xena@example.com")
+    c2.post("/api/autopay", json={"description": "Gym", "amount": 50, "frequency": "monthly", "start_date": (date.today() + timedelta(days=2)).isoformat()})
+    c2.patch("/api/account", json={"notify_email": False})
+    reg(app.test_client(), "noemail")                                              # no address: skipped
+    assert nt.send_all(app) == 1
+    out = app.extensions["outbox"]
+    assert out[-1]["to"] == "wade@example.com" and "Rent" in out[-1]["body"] and "Gym" not in out[-1]["body"]
+    assert nt.send_all(app) == 0                                                   # already emailed
+
+
+def test_reminders_for_detected_subscription(tmp_path):
+    app = mk(tmp_path); c = app.test_client(); reg(c, "yara")
+    base = date.today() - timedelta(days=27)                                       # monthly -> next charge in ~3 days
+    for k in range(3):
+        d = base - timedelta(days=30 * k)
+        c.post("/api/transactions", json={"date": d.isoformat(), "description": "Spotify Premium", "amount": 119})
+    items = c.get("/api/notifications").get_json()["items"]
+    assert any(i["kind"] == "renewal" and "Spotify" in i["message"] for i in items)
+
+
+def test_manage_cli_make_admin(tmp_path, monkeypatch, capsys):
+    import manage
+    db = str(tmp_path / "cli.sqlite")
+    monkeypatch.setattr(manage, "create_app", lambda: _mk({"TESTING": True, "DATABASE": db}))
+    c = _mk({"TESTING": True, "DATABASE": db}).test_client(); reg(c, "zed")
+    assert manage.main(["make-admin", "ZED"]) == 0
+    assert manage.main(["make-admin", "ghost"]) == 1
+    manage.main(["list-users"])
+    assert "admin" in capsys.readouterr().out
+
+
+# ---------- admin ----------
+def make_admin(app, username):
+    with app.app_context():
+        from app.db import get_db
+        get_db().execute("UPDATE users SET role='admin' WHERE username=?", (username,)); get_db().commit()
+
+
+def test_admin_requires_admin_role(tmp_path):
+    app = mk(tmp_path); anon = app.test_client()
+    assert anon.get("/api/admin/users").status_code == 401 and anon.get("/admin").status_code == 302
+    c = app.test_client(); reg(c, "plain")
+    assert c.get("/api/admin/users").status_code == 403 and c.get("/api/admin/stats").status_code == 403
+    assert c.get("/admin").status_code == 302                                    # redirected to dashboard
+    assert c.patch("/api/admin/users/1", json={"is_active": False}).status_code == 403
+
+
+def test_admin_manages_users_without_seeing_finances(tmp_path):
+    app = mk(tmp_path)
+    boss = app.test_client(); reg(boss, "boss"); make_admin(app, "boss")
+    user = app.test_client(); reg(user, "member", "password123", "member@example.com")
+    user.post("/api/transactions", json={"date": "2026-01-01", "description": "SECRET-PURCHASE", "amount": 77})
+    assert boss.get("/admin").status_code == 200
+    listing = boss.get("/api/admin/users").get_json()
+    assert {u["username"] for u in listing} == {"boss", "member"}
+    member = next(u for u in listing if u["username"] == "member")
+    assert member["transaction_count"] == 1
+    everything = "".join(boss.get(p).get_data(as_text=True) for p in ("/api/admin/users", "/api/admin/stats", "/api/admin/audit", "/api/admin/messages", "/admin"))
+    assert "SECRET-PURCHASE" not in everything and "password_hash" not in everything
+    assert boss.get("/api/admin/stats").get_json()["transactions"] == 1
+    assert boss.patch(f"/api/admin/users/{member['id']}", json={"is_active": False}).status_code == 200
+    assert user.get("/api/transactions").status_code == 401                       # disabled user locked out immediately
+    assert user.post("/api/login", json={"username": "member", "password": "password123"}).status_code == 403
+    assert boss.patch(f"/api/admin/users/{member['id']}", json={"is_active": True}).status_code == 200
+    assert boss.patch(f"/api/admin/users/{member['id']}", json={"role": "wizard"}).status_code == 400
+    assert boss.patch(f"/api/admin/users/{member['id']}", json={"role": "admin"}).status_code == 200
+    me = next(u for u in boss.get("/api/admin/users").get_json() if u["username"] == "boss")
+    assert boss.patch(f"/api/admin/users/{me['id']}", json={"is_active": False}).status_code == 409   # cannot lock yourself out
+    assert boss.patch("/api/admin/users/999", json={"is_active": False}).status_code == 404
+    actions = [a["action"] for a in boss.get("/api/admin/audit").get_json()]
+    assert "disable_user" in actions and "promote_user" in actions
+
+
+def test_admin_sends_reset_email_and_handles_messages(tmp_path):
+    app = mk(tmp_path)
+    boss = app.test_client(); reg(boss, "boss"); make_admin(app, "boss")
+    u = app.test_client(); reg(u, "member", "password123", "member@example.com"); reg(app.test_client(), "noemail")
+    ids = {x["username"]: x["id"] for x in boss.get("/api/admin/users").get_json()}
+    assert boss.post(f"/api/admin/users/{ids['noemail']}/reset-password").status_code == 409
+    assert boss.post(f"/api/admin/users/{ids['member']}/reset-password").status_code == 200
+    mail = app.extensions["outbox"][-1]
+    assert mail["to"] == "member@example.com" and "/reset/" in mail["body"]
+    visitor = app.test_client()
+    visitor.post("/contact", data={"name": "Ann", "email": "ann@example.com", "subject": "Hello", "message": "I need some help please"})
+    msgs = boss.get("/api/admin/messages").get_json()
+    assert len(msgs) == 1 and msgs[0]["resolved"] == 0 and boss.get("/api/admin/stats").get_json()["open_messages"] == 1
+    assert boss.patch(f"/api/admin/messages/{msgs[0]['id']}", json={"resolved": True}).status_code == 200
+    assert boss.get("/api/admin/stats").get_json()["open_messages"] == 0
+    assert boss.delete(f"/api/admin/messages/{msgs[0]['id']}").status_code == 200 and boss.get("/api/admin/messages").get_json() == []
+    assert boss.get("/api/admin/model").get_json().keys() >= {"available"}
+
+
+def test_admin_username_env_promotion(tmp_path):
+    app = mk(tmp_path, ADMIN_USERNAMES="Root, other")
+    c = app.test_client(); reg(c, "root")
+    assert c.get("/api/admin/stats").status_code == 200
+    d = app.test_client(); reg(d, "nobody")
+    assert d.get("/api/admin/stats").status_code == 403
+
+
+def test_last_admin_cannot_delete_account(tmp_path):
+    app = mk(tmp_path); c = app.test_client(); reg(c, "solo"); make_admin(app, "solo")
+    assert c.post("/api/account/delete", json={"password": "password123"}).status_code == 409
+
+
+# ---------- categorizer behaviour used by import ----------
+def test_import_preview_has_categories_and_corrections_teach_model(tmp_path):
+    c = mk(tmp_path).test_client(); reg(c, "zoe")
+    odd = [(date(2026, 2, 1), "UPI/ZORBLAX QUANTUM/555", 99.0, None), (date(2026, 2, 5), "UPI/SWIGGY/777", 120.0, None)]
+    prev = upload(c, pf.build(odd)).get_json()
+    by = {r["description"]: r for r in prev["rows"]}
+    assert by["UPI/SWIGGY/777"]["category"] == "Food" and not by["UPI/SWIGGY/777"]["low_confidence"]
+    unknown = by["UPI/ZORBLAX QUANTUM/555"]
+    assert unknown["category"] in ("Food", "Transport", "Shopping", "Bills", "Entertainment", "Health", "Education", "Other") and "category_confidence" in unknown
+    rows = [{"date": r["date"], "description": r["description"], "amount": r["amount"], "type": r["type"],
+             "category": "Education" if "ZORBLAX" in r["description"] else r["category"], "category_edited": "ZORBLAX" in r["description"]} for r in prev["rows"]]
+    assert c.post("/api/import/confirm", json={"rows": rows, "filename": "x.pdf", "file_hash": prev["file_hash"], "kind": "pdf"}).status_code == 201
+    cats = {t["description"]: t["category"] for t in c.get("/api/transactions").get_json()}
+    assert cats["UPI/ZORBLAX QUANTUM/555"] == "Education"
+    later = [(date(2026, 3, 1), "UPI/ZORBLAX QUANTUM/888", 50.0, None)]
+    assert upload(c, pf.build(later)).get_json()["rows"][0]["category"] == "Education"        # learned from the correction
+
+
+def test_categorizer_model_is_cached():
+    from app.ml import categorizer as cz
+    assert cz.build_model() is cz.build_model()
+    assert cz.build_model([("a b", "Food")]) is cz.build_model([("a b", "Food")])

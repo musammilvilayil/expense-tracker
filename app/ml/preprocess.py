@@ -16,7 +16,7 @@ def clean_description(text: str) -> str:
 BANK_NOISE = {
     "upi", "neft", "imps", "rtgs", "pos", "ach", "ecs", "nach", "atm", "dr", "cr", "debit", "credit",
     "payment", "pay", "paid", "to", "from", "by", "via", "txn", "transaction", "transfer", "trf", "ref",
-    "no", "bank", "card", "ltd", "pvt", "limited", "india", "the", "and", "of", "for", "online", "purchase",
+    "no", "bank", "card", "okaxis", "oksbi", "okicici", "okhdfcbank", "ybl", "ibl", "axl", "billdesk", "vps", "ltd", "pvt", "limited", "india", "the", "and", "of", "for", "online", "purchase",
 }
 
 

@@ -34,10 +34,18 @@ def create_app(config=None):
     app.context_processor(lambda: {"csrf_token": security.csrf_token})
 
     from .account import bp as account_bp
+    from .admin import bp as admin_bp
+    from .goals import bp as goals_bp
     from .imports import bp as imports_bp
+    from .notifications import bp as notifications_bp
+    from .reports import bp as reports_bp
     from .routes import bp
     app.register_blueprint(account_bp)
+    app.register_blueprint(admin_bp)
     app.register_blueprint(imports_bp)
+    app.register_blueprint(goals_bp)
+    app.register_blueprint(notifications_bp)
+    app.register_blueprint(reports_bp)
     app.register_blueprint(bp)
 
     @app.errorhandler(404)

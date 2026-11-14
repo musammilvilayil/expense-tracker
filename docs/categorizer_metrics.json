@@ -1,0 +1,265 @@
+{
+  "generated": "2026-11-14",
+  "model": "Word+Char TF-IDF + Logistic Regression",
+  "samples": 1344,
+  "merchants": 192,
+  "categories": [
+    "Food",
+    "Transport",
+    "Shopping",
+    "Bills",
+    "Entertainment",
+    "Health",
+    "Education",
+    "Other"
+  ],
+  "seed": 42,
+  "random_cv": {
+    "accuracy": 1.0,
+    "macro_precision": 1.0,
+    "macro_recall": 1.0,
+    "macro_f1": 1.0
+  },
+  "grouped_cv": {
+    "accuracy": 0.5216,
+    "macro_precision": 0.5246,
+    "macro_recall": 0.5216,
+    "macro_f1": 0.5221
+  },
+  "hint_split": {
+    "with_hint_word": {
+      "n": 333,
+      "accuracy": 0.8889
+    },
+    "without_hint_word": {
+      "n": 1011,
+      "accuracy": 0.4006
+    }
+  },
+  "confidence": [
+    {
+      "threshold": 0.0,
+      "coverage": 1.0,
+      "accuracy": 0.5216
+    },
+    {
+      "threshold": 0.3,
+      "coverage": 0.6629,
+      "accuracy": 0.6936
+    },
+    {
+      "threshold": 0.5,
+      "coverage": 0.4025,
+      "accuracy": 0.8318
+    },
+    {
+      "threshold": 0.7,
+      "coverage": 0.2448,
+      "accuracy": 0.8632
+    }
+  ],
+  "comparison": {
+    "Char TF-IDF + Logistic Regression": {
+      "random": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0
+      },
+      "grouped": {
+        "accuracy": 0.4985,
+        "macro_precision": 0.491,
+        "macro_recall": 0.4985,
+        "macro_f1": 0.4915
+      }
+    },
+    "Word+Char TF-IDF + Logistic Regression": {
+      "random": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0
+      },
+      "grouped": {
+        "accuracy": 0.5216,
+        "macro_precision": 0.5246,
+        "macro_recall": 0.5216,
+        "macro_f1": 0.5221
+      }
+    },
+    "Char TF-IDF + Linear SVM": {
+      "random": {
+        "accuracy": 1.0,
+        "macro_precision": 1.0,
+        "macro_recall": 1.0,
+        "macro_f1": 1.0
+      },
+      "grouped": {
+        "accuracy": 0.4985,
+        "macro_precision": 0.4858,
+        "macro_recall": 0.4985,
+        "macro_f1": 0.4891
+      }
+    },
+    "Word TF-IDF + Naive Bayes": {
+      "random": {
+        "accuracy": 0.9948,
+        "macro_precision": 0.9949,
+        "macro_recall": 0.9948,
+        "macro_f1": 0.9948
+      },
+      "grouped": {
+        "accuracy": 0.4382,
+        "macro_precision": 0.4436,
+        "macro_recall": 0.4382,
+        "macro_f1": 0.4358
+      }
+    },
+    "Majority class (baseline)": {
+      "random": {
+        "accuracy": 0.1228,
+        "macro_precision": 0.0614,
+        "macro_recall": 0.1228,
+        "macro_f1": 0.0801
+      },
+      "grouped": {
+        "accuracy": 0.1042,
+        "macro_precision": 0.0651,
+        "macro_recall": 0.1042,
+        "macro_f1": 0.0801
+      }
+    }
+  },
+  "per_class_grouped": {
+    "Food": {
+      "precision": 0.397,
+      "recall": 0.369,
+      "f1": 0.383,
+      "support": 168
+    },
+    "Transport": {
+      "precision": 0.5,
+      "recall": 0.53,
+      "f1": 0.514,
+      "support": 168
+    },
+    "Shopping": {
+      "precision": 0.326,
+      "recall": 0.375,
+      "f1": 0.349,
+      "support": 168
+    },
+    "Bills": {
+      "precision": 0.38,
+      "recall": 0.375,
+      "f1": 0.377,
+      "support": 168
+    },
+    "Entertainment": {
+      "precision": 0.582,
+      "recall": 0.488,
+      "f1": 0.531,
+      "support": 168
+    },
+    "Health": {
+      "precision": 0.685,
+      "recall": 0.726,
+      "f1": 0.705,
+      "support": 168
+    },
+    "Education": {
+      "precision": 0.643,
+      "recall": 0.655,
+      "f1": 0.649,
+      "support": 168
+    },
+    "Other": {
+      "precision": 0.683,
+      "recall": 0.655,
+      "f1": 0.669,
+      "support": 168
+    }
+  },
+  "confusion_grouped": [
+    [
+      62,
+      32,
+      23,
+      13,
+      8,
+      3,
+      9,
+      18
+    ],
+    [
+      17,
+      89,
+      31,
+      18,
+      1,
+      10,
+      0,
+      2
+    ],
+    [
+      17,
+      17,
+      63,
+      29,
+      15,
+      12,
+      12,
+      3
+    ],
+    [
+      15,
+      7,
+      27,
+      63,
+      20,
+      22,
+      7,
+      7
+    ],
+    [
+      9,
+      4,
+      30,
+      24,
+      82,
+      3,
+      12,
+      4
+    ],
+    [
+      11,
+      12,
+      2,
+      6,
+      8,
+      122,
+      1,
+      6
+    ],
+    [
+      7,
+      10,
+      14,
+      13,
+      1,
+      2,
+      110,
+      11
+    ],
+    [
+      18,
+      7,
+      3,
+      0,
+      6,
+      4,
+      20,
+      110
+    ]
+  ]
+}

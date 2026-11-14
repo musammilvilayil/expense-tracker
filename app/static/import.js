@@ -34,14 +34,18 @@ $('#imp-form').addEventListener('submit', async e => {
     <td><input type="checkbox" ${r.duplicate ? '' : 'checked'} aria-label="Include row ${r.i + 1}"></td><td>${r.date}</td><td>${esc(r.description)}</td>
     <td>${money(r.amount)}</td>
     <td><select aria-label="Type"><option ${r.type === 'expense' ? 'selected' : ''}>expense</option><option ${r.type === 'income' ? 'selected' : ''}>income</option></select></td>
-    <td>${r.duplicate ? `<span class="badge dupb" title="${esc(r.matched || '')}">Duplicate</span>` : '<span class="badge newb">New</span>'}${r.confidence === 'guess' ? ' <span class="badge guessb" title="Debit/credit was guessed">Check type</span>' : ''}</td></tr>`).join('');
+    <td>${r.type === 'expense' ? `<select class="cat" data-orig="${r.category}" aria-label="Category">${CATS.map(c => `<option ${c === r.category ? 'selected' : ''}>${c}</option>`).join('')}</select>` : '<small>Income</small>'}</td>
+    <td>${r.duplicate ? `<span class="badge dupb" title="${esc(r.matched || '')}">Duplicate</span>` : '<span class="badge newb">New</span>'}${r.confidence === 'guess' ? ' <span class="badge guessb" title="Debit/credit was guessed">Check type</span>' : ''}${r.low_confidence && !r.duplicate ? ' <span class="badge guessb" title="The model is unsure about this category">Check category</span>' : ''}</td></tr>`).join('');
   $('#imp-all').checked = c.new > 0; $('#imp-preview').hidden = false; updateImpButton();
 });
 
 function selectedRows() {
   return [...document.querySelectorAll('#imp-table tbody tr')].filter(tr => tr.querySelector('input').checked).map(tr => {
     const r = impData.rows[+tr.dataset.i];
-    return {date: r.date, description: r.description, amount: r.amount, type: tr.querySelector('select').value};
+    const type = tr.querySelector('select').value, cat = tr.querySelector('select.cat');
+    const row = {date: r.date, description: r.description, amount: r.amount, type};
+    if (type === 'expense' && cat) { row.category = cat.value; row.category_edited = cat.value !== cat.dataset.orig; }
+    return row;
   });
 }
 function updateImpButton() { const n = selectedRows().length; $('#imp-go').textContent = `Import ${n} selected`; $('#imp-go').disabled = n === 0; }

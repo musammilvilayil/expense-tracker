@@ -1,0 +1,16 @@
+{% extends "app_base.html" %}
+{% block title %}Admin · AI Finance Tracker{% endblock %}
+{% block content %}
+<h1 class="pagetitle">Admin</h1>
+<p class="hint">Admins manage accounts and support messages. Users' transactions and financial data are never shown here.</p>
+<section class="grid kpis" id="a-stats"></section>
+<section class="card" style="margin-top:18px"><h2>Users</h2>
+  <div class="tablewrap"><table id="a-users"><thead><tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Transactions</th><th>Joined</th><th></th></tr></thead><tbody></tbody></table></div></section>
+<section class="card"><h2>Contact messages</h2><div id="a-msgs"></div></section>
+<section class="grid two">
+  <div class="card"><h2>Categorizer quality</h2><div id="a-model" class="hint">Loading…</div></div>
+  <div class="card"><h2>Audit log</h2><table id="a-audit"><thead><tr><th>When</th><th>Admin</th><th>Action</th><th>Target</th></tr></thead><tbody></tbody></table></div>
+</section>
+<p id="a-msg" role="status"></p>
+{% endblock %}
+{% block scripts %}<script src="/static/admin.js"></script>{% endblock %}
